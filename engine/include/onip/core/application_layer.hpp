@@ -7,14 +7,14 @@
 namespace onip {
     class ApplicationLayer {
     public:
-        ApplicationLayer(std::string_view name) : m_Name(name) {}
+        ApplicationLayer(std::string_view name) : m_name(name) {}
         virtual ~ApplicationLayer() = default;
 
         virtual void on_update() {}
 
-        const std::string& name() const { return m_Name; }
+        const std::string& name() const { return m_name; }
     private:
-        std::string m_Name;
+        std::string m_name;
     };
 }
 
