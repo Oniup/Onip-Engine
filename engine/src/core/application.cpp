@@ -2,6 +2,7 @@
 #include "onip/config.hpp"
 #include "onip/core/input.hpp"
 #include "onip/graphics/gl_pipeline.hpp"
+#include "onip/core/scene_manager.hpp"
 
 namespace onip {
     Application* Application::get() {
@@ -10,6 +11,7 @@ namespace onip {
 
     void Application::run() {
         m_pipeline = static_cast<GLPipeline*>(add_layer(new GLPipeline()));
+        m_scene_manager = static_cast<SceneManager*>(add_layer(new SceneManager()));
 
         initialize_layers();
         while (!m_pipeline->window()->closing()) {
