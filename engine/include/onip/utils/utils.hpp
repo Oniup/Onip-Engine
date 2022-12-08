@@ -27,8 +27,8 @@
 #define ONIP_LOG(condition, format, ...) // TODO: implement logging system in utils first ...
 
 namespace onip {
-    typedef uint64_t UUID;
-    typedef char Byte;
+    using UUID = uint64_t;
+    using Byte = char;
 
     struct Utils {
         template <typename _T>

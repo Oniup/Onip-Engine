@@ -6,7 +6,7 @@ namespace onip {
         : ApplicationLayer("Scene Manager") { }
 
     void SceneManager::impl_set_active(std::string_view scene_name) {
-        for (Scene* scene : m_loaded_scenes) {
+        for (auto scene : m_loaded_scenes) {
             if (scene->name == scene_name) {
                 m_active_scene = scene;
                 return;
@@ -15,7 +15,7 @@ namespace onip {
     }
 
     void SceneManager::impl_load_empty() {
-        m_loaded_scenes.push_back(new Scene {});
+        m_loaded_scenes.push_back(std::make_shared<Scene>());
     }
 
     void SceneManager::impl_load_existing(std::string_view scene_path) {

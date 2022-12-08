@@ -6,7 +6,6 @@ namespace onip {
     public:
         EntityManager() = default;
         ~EntityManager() = default;
-
     private:
     };
 }
