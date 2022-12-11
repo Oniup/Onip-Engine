@@ -12,7 +12,7 @@
 #endif // ONIP_NO_FORCE_INLINE
 
 #ifndef NDEBUG
-    #define ONIP_ASSERT(condition, format, ...) {\
+    #define ONIP_ASSERT_FMT(condition, format, ...) {\
         if (!condition) {\
             printf(format, __VA_ARGS__);\
             exit(-1);\
@@ -20,7 +20,7 @@
     }\
 
 #else
-    #define ONIP_ASSERT(condition, format, ...)
+    #define ONIP_ASSERT_FMT(condition, format, ...)
 
 #endif // NDEBUG 
 

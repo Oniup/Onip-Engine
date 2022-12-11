@@ -5,52 +5,100 @@
 #include "onip/utils/pool.hpp"
 
 #include <iostream>
-#include <unordered_map>
+#include <vector>
 
 namespace onip {
     struct ComponentMeta {
         size_t type;
     };
-        
+
     class ComponentManager {
+    private:
+        struct ComponentGroup {
+            std::vector<uint32_t> comps_ids;
+            Pool* pool;
+        };
     public:
         ComponentManager() = default;
-        ~ComponentManager() = default;
 
-        void createPool(size_t chunk_size) {
+        ~ComponentManager() {
+            for (ComponentGroup* group : groups) {
+                delete group->pool;
+                delete group;
+            }
         }
 
         template <typename ... _Components>
-        void pushComponent(uint32_t entity_id) {
-            float index = getPoolIndex<_Components...>();
+        void createGroup() {
+            uint32_t ids[] = { _Components::getId() ... };
+            size_t ids_size = sizeof(ids) / sizeof(uint32_t);
 
-            if (m_pools.find(index) != m_pools.end()) {
-                size_t sizes[] = { sizeof(_Components)... };
-                uint32_t count = sizeof(chunk_size) / sizeof(size_t);
-                size_t chunk_size = 0;
-                for (uint32_t i = 0; i < count; i++) {
-                    chunk_sizes += sizes[i];
-                }
-                createPool(chunk_size);
+#ifndef NDEBUG
+            if (!checkRepeatingIds(ids, ids_size)) {
+                return;
             }
+#endif // NDEBUG
 
-            Pool* pool = m_pools.at(index);
-            void* chunk = pool->allocate();
+            ComponentGroup* group = new ComponentGroup{};
+            for (size_t i = 0; i < ids_size; i++) {
+                group->comps_ids.push_back(ids[i]);
+            }
+            size_t sizes[] = { sizeof(_Components) ... };
+            size_t chunk_size = sizes[0];
+            for (size_t i = 1; i < ids_size; i++) {
+                if (sizes[i] > chunk_size) {
+                    chunk_size = sizes[i];
+                }
+            }
+            group->pool = new Pool(chunk_size, chunk_size * ONIP_SCENE_COMP_POOL_BLOCK_COUNT);
+            groups.push_back(std::move(group));
+        }
+
+
+        template <typename ... _Components>
+        Pool* getPool() {
+            uint32_t ids[] = { _Components::getId() ... };
+            size_t ids_size = sizeof(ids) / sizeof(uint32_t);
+
+#ifndef NDEBUG
+            if (!checkRepeatingIds(ids, ids_size)) {
+                return nullptr;
+            }
+#endif // NDEBUG
+
+            uint32_t found = 0;
+            for (ComponentGroup* group : groups) {
+                if (group->comps_ids.size() == ids_size) {
+                    for (size_t i = 0; i < ids_size; i++) {
+                        for (uint32_t id : group->comps_ids) {
+                            if (ids[i] == id) {
+                                found++;
+                                continue;
+                            }
+                        }
+                    }
+                    if (found == ids_size) {
+                        return group->pool;
+                    }
+                }
+            }
+            return nullptr;
         }
     private:
-        template <typename ... _Components>
-        static float getPoolIndex() {
-           const uint32_t ids[] = { _Components::id()... };
-           const uint32_t size = sizeof(ids) / sizeof(uint32_t);
-
-            float index = 0.0f;
-            for (uint32_t i = 0; i < size; i++) {
-                index += static_cast<float>(ids[i]) * 0.5f;
+        bool checkRepeatingIds(uint32_t ids[], size_t ids_size) {
+            for (size_t i = 0; i < ids_size; i++) {
+                for (size_t j = 0; j < ids_size; j++) {
+                    if (i != j) {
+                        if (ids[i] == ids[j]) {
+                            std::cout << "cannot create component group as there is two ids that are the same\n";
+                            return false;
+                        }
+                    }
+                }
             }
-            return index;
+            return true;
         }
-
-        std::unordered_map<float, Pool*> m_pools;
+        std::vector<ComponentGroup*> groups {};
     };
 }
 

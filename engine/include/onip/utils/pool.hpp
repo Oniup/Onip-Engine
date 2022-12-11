@@ -75,13 +75,13 @@ namespace onip {
         Chunk* allocateBlock();
         void setChunkDefault(Chunk* chunk, const size_t& size);
 
-        size_t m_chunk_size = 0;
-        size_t m_block_size = 0;
-        size_t m_allocations = 0;
-        Chunk* m_next = nullptr;
-        Chunk* m_tail = nullptr;
-        std::list<void*> m_blocks;
-        std::vector<void*> m_released;
+        size_t m_chunk_size { 0 };
+        size_t m_block_size { 0 };
+        size_t m_allocations { 0 };
+        Chunk* m_next { nullptr };
+        Chunk* m_tail { nullptr };
+        std::list<void*> m_blocks {};
+        std::vector<void*> m_released {};
     };
 }
 

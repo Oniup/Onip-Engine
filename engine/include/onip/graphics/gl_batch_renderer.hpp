@@ -18,10 +18,10 @@ namespace onip {
         void pushTransformData(struct Transform* transform);
         void pushVertices(const Vertex* vertices, size_t size);
 
-        std::vector<Vertex> m_vertices;
-        std::vector<glm::mat4> m_transforms;
-        std::vector<uint32_t> m_textures;
-        bool m_update_every_buffer = true;
+        std::vector<Vertex> m_vertices {};
+        std::vector<glm::mat4> m_transforms {};
+        std::vector<uint32_t> m_textures {};
+        bool m_update_every_buffer { true };
     };
 }
 

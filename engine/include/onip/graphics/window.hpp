@@ -73,14 +73,14 @@ namespace onip {
     
         static bool s_InitializedGlad;
     
-        GLFWwindow* m_internal = nullptr;
-        glm::ivec2 m_size;
-        glm::ivec2 m_position;
-        std::string m_title;
-        Resolution m_resolution = Resolution_Custom;
-        Config m_config = Config_None;
-        glm::vec4 m_clear_color = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
-        glm::ivec2 m_viewport_offset;
+        GLFWwindow* m_internal { nullptr };
+        glm::ivec2 m_size { 0, 0 };
+        glm::ivec2 m_position { 0, 0 };
+        std::string m_title {};
+        Resolution m_resolution { Resolution_None };
+        Config m_config { Config_None };
+        glm::vec4 m_clear_color {glm::vec4(0.0f, 0.0f, 0.0f, 1.0f) };
+        glm::ivec2 m_viewport_offset { 0, 0 };
     };
 }
 

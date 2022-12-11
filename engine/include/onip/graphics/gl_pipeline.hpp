@@ -67,13 +67,13 @@ namespace onip {
 
         void onUpdate() override;
     private:
-        Window m_window;
-        int m_max_texture_units;
-        std::vector<Renderer*> m_renderers;
+        Window m_window {};
+        int m_max_texture_units {};
+        std::vector<Renderer*> m_renderers {};
 
-        std::vector<Shader*> m_shaders;
-        std::vector<Texture*> m_textures;
-        std::vector<Material*> m_materials;
+        std::vector<Shader*> m_shaders {};
+        std::vector<Texture*> m_textures {};
+        std::vector<Material*> m_materials {};
     };
 }
 

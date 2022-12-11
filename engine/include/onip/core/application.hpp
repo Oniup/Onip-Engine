@@ -22,9 +22,9 @@ namespace onip {
     private:
         void destroyLayers();
 
-        std::vector<ApplicationLayer*> m_layers;
-        class GLPipeline* m_pipeline;
-        class SceneManager* m_scene_manager;
+        std::vector<ApplicationLayer*> m_layers {};
+        class GLPipeline* m_pipeline { nullptr };
+        class SceneManager* m_scene_manager { nullptr };
     };
 }
 
