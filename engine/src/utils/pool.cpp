@@ -4,8 +4,8 @@
 #include <assert.h>
 
 namespace onip {
-    Pool::Pool(size_t chunk_size, size_t block_size)
-        : m_chunk_size(chunk_size), m_block_size(block_size) {
+    Pool::Pool(size_t getChunkSize, size_t getBlockSize)
+        : m_chunk_size(getChunkSize), m_block_size(getBlockSize) {
         assert(m_chunk_size > 0 && "Failed to create Memory/Object Pool as _chunk_size is set to 0 which doesn't make any sense");
         assert(m_block_size > 0 && "Failed to create Memory/Object Pool as _block_size is set to 0 which doesn't make any sense");
     }
@@ -31,7 +31,7 @@ namespace onip {
         return Iterator(nullptr);
     }
 
-    void* Pool::allocate() {
+    void* Pool::allocateData() {
         void* allocation = nullptr;
         if (m_released.size() > 0) {
             allocation = m_released[0];
@@ -39,7 +39,7 @@ namespace onip {
         }
         else {
             if (m_next == nullptr) {
-                m_next = allocate_block();
+                m_next = allocateBlock();
             }
 
             Byte* byte_data = reinterpret_cast<Byte*>(m_next);
@@ -50,26 +50,26 @@ namespace onip {
         return allocation;
     }
 
-    void Pool::release(void* ptr) {
+    void Pool::releaseData(void* ptr) {
         Byte* byte = static_cast<Byte*>(ptr);
         *byte = null();
         m_released.push_back(ptr);
         m_allocations--;
     }
 
-    Pool::Chunk* Pool::allocate_block() {
-        size_t block_size = (sizeof(Chunk) + m_chunk_size) * m_block_size;
-        Chunk* block = static_cast<Chunk*>(malloc(block_size));
+    Pool::Chunk* Pool::allocateBlock() {
+        size_t getBlockSize = (sizeof(Chunk) + m_chunk_size) * m_block_size;
+        Chunk* block = static_cast<Chunk*>(malloc(getBlockSize));
         assert(block && "Failed to allocate memory block for Memory/Object Pool as OS ran out of memory");
 
         Chunk* chunk = block;
         size_t size = sizeof(Chunk) + m_chunk_size;
         for (size_t i = 1; i < m_block_size; i++) {
-            set_chunk_default(chunk, size);
+            setChunkDefault(chunk, size);
             chunk = chunk->next;
         }
 
-        set_chunk_default(chunk, size);
+        setChunkDefault(chunk, size);
         chunk->next = nullptr;
 
         block->prev = m_tail;
@@ -82,7 +82,7 @@ namespace onip {
         return block;
     }
 
-    void Pool::set_chunk_default(Chunk* chunk, const size_t& size) {
+    void Pool::setChunkDefault(Chunk* chunk, const size_t& size) {
         Byte* byte_data = reinterpret_cast<Byte*>(chunk);
         byte_data[sizeof(Chunk)] = null();
 

@@ -5,31 +5,31 @@
 #include "onip/core/scene_manager.hpp"
 
 namespace onip {
-    Application* Application::get() {
-        return Config::application();
+    Application* Application::getInstance() {
+        return Config::settingsApplication();
     }
 
     void Application::run() {
-        m_pipeline = static_cast<GLPipeline*>(add_layer(new GLPipeline()));
-        m_scene_manager = static_cast<SceneManager*>(add_layer(new SceneManager()));
+        m_pipeline = static_cast<GLPipeline*>(addLayer(new GLPipeline()));
+        m_scene_manager = static_cast<SceneManager*>(addLayer(new SceneManager()));
 
-        initialize_layers();
-        while (!m_pipeline->window()->closing()) {
-            Input::poll_events();
+        initializeLayers();
+        while (!m_pipeline->getWindow()->isClosing()) {
+            Input::pollEvents();
             for (ApplicationLayer* layer : m_layers) {
-                layer->on_update();
+                layer->onUpdate();
             }
-            m_pipeline->window()->clear_screen();
+            m_pipeline->getWindow()->clearScreen();
         }
-        destroy_layers();
+        destroyLayers();
     }
 
-    ApplicationLayer* Application::add_layer(ApplicationLayer* layer) {
+    ApplicationLayer* Application::addLayer(ApplicationLayer* layer) {
         m_layers.insert(m_layers.begin(), layer);
         return m_layers[0];
     }
 
-    void Application::destroy_layers() {
+    void Application::destroyLayers() {
         if (m_layers.size() > 0) {
             for (ApplicationLayer* layer : m_layers) {
                 delete layer;

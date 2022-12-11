@@ -1,5 +1,5 @@
-#ifndef __ONIP_CORE_SCENE_MANAGER_HPP__
-#define __ONIP_CORE_SCENE_MANAGER_HPP__
+#ifndef __ONIP_CORE_getSceneManager_HPP__
+#define __ONIP_CORE_getSceneManager_HPP__
 
 #include "onip/utils/utils.hpp"
 #include "onip/core/application.hpp"
@@ -28,22 +28,22 @@ namespace onip {
         SceneManager();
         ~SceneManager() = default;
 
-        ONIP_INLINE static std::shared_ptr<Scene> active_scene() { return Application::scene_manager()->m_active_scene; }
-        ONIP_INLINE static const std::vector<std::shared_ptr<Scene>>& loaded_scenes() { return Application::scene_manager()->m_loaded_scenes; }
+        ONIP_INLINE static std::shared_ptr<Scene> active_scene() { return Application::getSceneManager()->m_active_scene; }
+        ONIP_INLINE static const std::vector<std::shared_ptr<Scene>>& loaded_scenes() { return Application::getSceneManager()->m_loaded_scenes; }
 
-        ONIP_INLINE static void set_active(std::string_view scene_name) { Application::scene_manager()->impl_set_active(scene_name); }
-        ONIP_INLINE static void load_empty() { Application::scene_manager()->impl_load_empty(); }
-        ONIP_INLINE static void load_existing(std::string_view scene_path) { Application::scene_manager()->impl_load_existing(scene_path); }
-        ONIP_INLINE static void serialize(Scene* scene) { Application::scene_manager()->impl_serialize(scene); }
+        ONIP_INLINE static void setActive(std::string_view scene_name) { Application::getSceneManager()->implSetActive(scene_name); }
+        ONIP_INLINE static void load_empty() { Application::getSceneManager()->implLoadEmpty(); }
+        ONIP_INLINE static void loadExisting(std::string_view scene_path) { Application::getSceneManager()->implLoadExisting(scene_path); }
+        ONIP_INLINE static void serialize(Scene* scene) { Application::getSceneManager()->implSerialize(scene); }
     private:
-        void impl_set_active(std::string_view scene_name);
-        void impl_load_empty();
-        void impl_load_existing(std::string_view scene_path);
-        void impl_serialize(Scene* scene);
+        void implSetActive(std::string_view scene_name);
+        void implLoadEmpty();
+        void implLoadExisting(std::string_view scene_path);
+        void implSerialize(Scene* scene);
 
         std::vector<std::shared_ptr<Scene>> m_loaded_scenes;
         std::shared_ptr<Scene> m_active_scene = nullptr;
     };
 }
 
-#endif // __ONIP_CORE_SCENE_MANAGER_HPP__
+#endif // __ONIP_CORE_getSceneManager_HPP__

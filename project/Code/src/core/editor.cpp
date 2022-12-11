@@ -3,13 +3,12 @@
 #include <onip/config.hpp>
 
 namespace onip {
-    Application* Config::application() {
+    Application* Config::settingsApplication() {
         static Editor editor;
         return &editor;
     }
 
-    void Config::default_components(Entity* entity) {
-        // Ecs::add_component<Transform>(entity);
+    void Config::settingDefaultComponents(Entity* entity) {
     }
 }
 
@@ -19,5 +18,5 @@ Editor::Editor() {
 Editor::~Editor() {
 }
 
-void Editor::initialize_layers() {
+void Editor::initializeLayers() {
 }

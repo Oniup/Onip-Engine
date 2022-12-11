@@ -12,7 +12,7 @@
 #endif // ONIP_NO_FORCE_INLINE
 
 #ifndef NDEBUG
-    #define onipAssert(condition, format, ...) {\
+    #define ONIP_ASSERT(condition, format, ...) {\
         if (!condition) {\
             printf(format, __VA_ARGS__);\
             exit(-1);\
@@ -20,7 +20,7 @@
     }\
 
 #else
-    #define onipAssert(condition, format, ...)
+    #define ONIP_ASSERT(condition, format, ...)
 
 #endif // NDEBUG 
 
@@ -42,8 +42,8 @@ namespace onip {
         }
 
         static int rand_int32();
-        static uint32_t rand_uint32();
-        static uint64_t rand_uint64();
+        static uint32_t randUint32();
+        static uint64_t randUint64();
     };
 }
 

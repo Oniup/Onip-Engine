@@ -6,18 +6,18 @@ namespace onip {
     GLBatch::GLBatch() 
         : GLPipeline::Renderer(GLPipeline::Renderer::Type_Batch) { }
 
-    void GLBatch::on_render() {
+    void GLBatch::onRender() {
     }
 
-    void GLBatch::load_data() {
+    void GLBatch::loadData() {
         // TODO: Complete ECS
     }
 
-    void GLBatch::push_transform_data(Transform* transform) {
+    void GLBatch::pushTransformData(Transform* transform) {
         // TODO: Complete ECS
     }
 
-    void GLBatch::push_vertices(const Vertex* vertices, size_t size) {
+    void GLBatch::pushVertices(const Vertex* vertices, size_t size) {
 
     }
 }

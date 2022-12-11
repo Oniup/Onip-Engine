@@ -51,10 +51,10 @@ namespace onip {
             Renderer(Type type)
                 : m_type(type) {}
 
-            const Type type() const { return m_type; }
+            const Type getType() const { return m_type; }
 
             virtual ~Renderer() = default;
-            virtual void on_render() = 0;
+            virtual void onRender() = 0;
         private:
             Type m_type;
         };
@@ -62,10 +62,10 @@ namespace onip {
         GLPipeline();
         ~GLPipeline() override;
 
-        ONIP_INLINE const Window* window() const { return &m_window; }
-        ONIP_INLINE Window* window() { return &m_window; }
+        ONIP_INLINE const Window* getWindow() const { return &m_window; }
+        ONIP_INLINE Window* getWindow() { return &m_window; }
 
-        void on_update() override;
+        void onUpdate() override;
     private:
         Window m_window;
         int m_max_texture_units;

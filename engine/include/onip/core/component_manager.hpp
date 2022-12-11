@@ -17,12 +17,12 @@ namespace onip {
         ComponentManager() = default;
         ~ComponentManager() = default;
 
-        void create_pool(size_t chunk_size) {
+        void createPool(size_t chunk_size) {
         }
 
         template <typename ... _Components>
-        void push_component(uint32_t entity_id) {
-            float index = get_pool_index<_Components...>();
+        void pushComponent(uint32_t entity_id) {
+            float index = getPoolIndex<_Components...>();
 
             if (m_pools.find(index) != m_pools.end()) {
                 size_t sizes[] = { sizeof(_Components)... };
@@ -31,7 +31,7 @@ namespace onip {
                 for (uint32_t i = 0; i < count; i++) {
                     chunk_sizes += sizes[i];
                 }
-                create_pool(chunk_size);
+                createPool(chunk_size);
             }
 
             Pool* pool = m_pools.at(index);
@@ -39,7 +39,7 @@ namespace onip {
         }
     private:
         template <typename ... _Components>
-        static float get_pool_index() {
+        static float getPoolIndex() {
            const uint32_t ids[] = { _Components::id()... };
            const uint32_t size = sizeof(ids) / sizeof(uint32_t);
 

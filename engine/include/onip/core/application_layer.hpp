@@ -10,9 +10,9 @@ namespace onip {
         ApplicationLayer(std::string_view name) : m_name(name) {}
         virtual ~ApplicationLayer() = default;
 
-        virtual void on_update() {}
+        virtual void onUpdate() {}
 
-        const std::string& name() const { return m_name; }
+        const std::string& getName() const { return m_name; }
     private:
         std::string m_name;
     };

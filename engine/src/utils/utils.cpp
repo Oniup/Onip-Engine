@@ -13,11 +13,11 @@ namespace onip {
         return rand();
     }
 
-    uint32_t Utils::rand_uint32() {
+    uint32_t Utils::randUint32() {
         return static_cast<uint32_t>(rand());
     }
 
-    uint64_t Utils::rand_uint64() {
+    uint64_t Utils::randUint64() {
         // Not going to pretend to understand what is going on here, got this solution from here:
         // https://stackoverflow.com/questions/33010010/how-to-generate-random-64-bit-unsigned-integer-in-c
         uint64_t r = 0;

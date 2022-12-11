@@ -12,11 +12,11 @@ namespace onip {
         GLBatch();
         ~GLBatch() override = default;
 
-        void on_render() override;
+        void onRender() override;
     private:
-        void load_data();
-        void push_transform_data(struct Transform* transform);
-        void push_vertices(const Vertex* vertices, size_t size);
+        void loadData();
+        void pushTransformData(struct Transform* transform);
+        void pushVertices(const Vertex* vertices, size_t size);
 
         std::vector<Vertex> m_vertices;
         std::vector<glm::mat4> m_transforms;
