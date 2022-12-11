@@ -59,10 +59,10 @@ namespace onip {
         void* allocateData();
         void releaseData(void* ptr);
 
-        template <typename _Object>
-        _Object* allocateData() {
+        template <typename _Object, typename ... _Args>
+        _Object* allocateData(_Args ... args) {
             _Object* object = static_cast<_Object*>(allocateData());
-            new (object) _Object{};
+            new (object) _Object{ args ... };
             return object;
         }
 

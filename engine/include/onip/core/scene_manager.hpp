@@ -48,10 +48,8 @@ namespace onip {
 
 
 
-    template <typename _Component>
-    ONIP_INLINE static _Component* addComponent() {
-        return nullptr;
-    }
+    template <typename _Component, typename ... _Args>
+    ONIP_INLINE static _Component* addComponent(uint32_t entity_id, _Args ... comp_constructor_args) { return Application::getSceneManager()->getActiveScene()->component_manager.addComponent<_Component>(entity_id, comp_constructor_args...); }
 
     template <typename ... _Components> 
     ONIP_INLINE static void createComponentGroup() { Application::getSceneManager()->getActiveScene()->component_manager.createGroup<_Components...>(); }
