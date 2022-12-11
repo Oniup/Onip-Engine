@@ -45,17 +45,21 @@ namespace onip {
         Scene* m_active_scene { nullptr };
     };
 
+    struct Ecs {
+        template <typename _Component, typename ... _Args>
+        ONIP_INLINE static _Component* addComponent(Entity* entity, _Args ... comp_constructor_args) { return Application::getSceneManager()->getActiveScene()->component_manager.addComponent<_Component>(entity, comp_constructor_args...); }
 
+        template <typename ... _Components> 
+        ONIP_INLINE static void createComponentGroup() { Application::getSceneManager()->getActiveScene()->component_manager.createGroup<_Components...>(); }
 
+        template <typename ... _Components>
+        ONIP_INLINE static class Pool* getComponentGroupPool() { return Application::getSceneManager()->getActiveScene()->component_manager.getPool<_Components...>(); }
 
-    template <typename _Component, typename ... _Args>
-    ONIP_INLINE static _Component* addComponent(uint32_t entity_id, _Args ... comp_constructor_args) { return Application::getSceneManager()->getActiveScene()->component_manager.addComponent<_Component>(entity_id, comp_constructor_args...); }
-
-    template <typename ... _Components> 
-    ONIP_INLINE static void createComponentGroup() { Application::getSceneManager()->getActiveScene()->component_manager.createGroup<_Components...>(); }
-
-    template <typename ... _Components>
-    ONIP_INLINE static class Pool* getComponentGroupPool() { return Application::getSceneManager()->getActiveScene()->component_manager.getPool<_Components...>(); }
+        ONIP_INLINE static Entity* createEntity(bool is_dynamic = true) { return Application::getSceneManager()->getActiveScene()->entity_manager.createEntity(nullptr, 0, is_dynamic); }
+        ONIP_INLINE static Entity* createEntity(const std::string& tag, bool is_dynamic = true) { return Application::getSceneManager()->getActiveScene()->entity_manager.createEntity(&tag, 0, is_dynamic); }
+        ONIP_INLINE static Entity* createEntity(uint32_t layer, bool is_dynamic = true) { return Application::getSceneManager()->getActiveScene()->entity_manager.createEntity(nullptr, layer, is_dynamic); }
+        ONIP_INLINE static Entity* createEntity(const std::string& tag, uint32_t layer, bool is_dynamic = true) { return Application::getSceneManager()->getActiveScene()->entity_manager.createEntity(&tag, layer, is_dynamic); }
+    };
 }
 
 #endif // __ONIP_CORE_getSceneManager_HPP__

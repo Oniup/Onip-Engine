@@ -3,6 +3,7 @@
 
 #include "onip/utils/utils.hpp"
 #include "onip/utils/pool.hpp"
+#include "onip/core/entity_manager.hpp"
 
 #include <iostream>
 #include <vector>
@@ -10,7 +11,7 @@
 namespace onip {
     struct ComponentMeta {
         uint32_t comp_id;
-        uint32_t entity_id;
+        Entity* entity;
     };
 
     class ComponentManager {
@@ -130,15 +131,16 @@ namespace onip {
         }
 
         template <typename _Component, typename ... Args>
-        _Component* addComponent(uint32_t entity_id, Args ... comp_constructor_args) {
+        _Component* addComponent(Entity* entity, Args ... comp_constructor_args) {
             Pool* pool = getPoolWhichContains<_Component>();
             if (pool != nullptr) {
                 ComponentMeta* meta = static_cast<ComponentMeta*>(pool->allocateData());
                 meta->comp_id = _Component::getId();
-                meta->entity_id = entity_id;
+                meta->entity = entity;
                 _Component* comp = getCompFromMeta<_Component>(meta);
 
                 new (comp) _Component { comp_constructor_args ... };
+                entity->components.push_back(new EntityComponentData { _Component::getId(), static_cast<void*>(comp) });
                 return comp;
             }
             return nullptr;

@@ -3,38 +3,19 @@
 #include <onip/config.hpp>
 #include <onip/core/scene_manager.hpp>
 #include <onip/utils/pool.hpp>
+#include <onip/components/graphics_comps.hpp>
 #include <glm/glm.hpp>
 
-namespace onip {
-    Application* Config::settingsApplication() {
-        static Editor editor;
-        return &editor;
-    }
+using namespace onip;
 
-    void Config::settingDefaultComponents(Entity* entity) {
-    }
+Application* Config::settingsApplication() {
+    static Editor editor;
+    return &editor;
 }
 
-struct TransformTest {
-    TransformTest() = default;
-
-    TransformTest(glm::vec3 position)
-        : position(position) {}
-
-    ~TransformTest() = default;
-
-    static uint32_t getId() { return 0; }
-
-    glm::vec3 position {};
-    glm::vec3 scale { 1.0f, 1.0f, 1.0f };
-};
-
-struct SpriteRenderer {
-    static uint32_t getId() { return 1; }
-
-    uint32_t texture_id;
-    glm::vec4 overlay_color;
-};
+void Config::settingDefaultComponents(Entity* entity) {
+    Ecs::addComponent<Transform>(entity);
+}
 
 Editor::Editor() {
 }
@@ -43,8 +24,14 @@ Editor::~Editor() {
 }
 
 void Editor::initializeLayers() {
-    onip::SceneManager::loadEmpty();
-    onip::createComponentGroup<TransformTest, SpriteRenderer>();
-    TransformTest* test = onip::addComponent<TransformTest>(69, glm::vec3(69.0f, 420.0f, 489.0f));
-    std::cout << "hopefully it worked" << "\n";
+    SceneManager::loadEmpty();
+
+    Ecs::createComponentGroup<Camera, Transform, SpriteRenderer, MeshRenderer>();
+    Entity* entity = Ecs::createEntity("Player");
+    Ecs::addComponent<SpriteRenderer>(entity);
+    Ecs::addComponent<Camera>(entity);
+
+    for (EntityComponentData* data : entity->components) {
+        std::cout << "id: " << data->comp_id << "\n";
+    }
 }

@@ -19,7 +19,7 @@ namespace onip {
         // Application instance that you inherited, return that
         static class Application* settingsApplication();
         // defines the components that every entity will be assigned with when it is created
-        static void settingDefaultComponents(class Entity* entity);
+        static void settingDefaultComponents(struct Entity* entity);
     };
 }
 
