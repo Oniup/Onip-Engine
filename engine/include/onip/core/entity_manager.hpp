@@ -29,7 +29,7 @@ namespace onip {
         EntityManager() = default;
         ~EntityManager();
 
-        Entity* createEntity(const std::string* tag, uint32_t layer, bool is_dynamic);
+        Entity* createEntity(const char* tag, uint32_t layer, bool is_dynamic);
         void destroyEntity(Entity* entity);
         void clearDestroyedBuffer();
 private:

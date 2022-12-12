@@ -10,21 +10,26 @@
 
 namespace onip {
     struct ComponentMeta {
-        uint32_t comp_id;
-        Entity* entity;
+        uint32_t comp_id {};
+        Entity* entity { nullptr };
     };
 
     class ComponentManager {
     private:
         struct ComponentGroup {
-            std::vector<uint32_t> comp_ids;
-            Pool* pool;
+            std::vector<uint32_t> comp_ids {};
+            Pool* pool { nullptr };
+        };
+
+        struct ComponentDestroyingData {
+            ComponentMeta* meta { nullptr };
+            Pool* target_pool { nullptr };
         };
     public:
         ComponentManager() = default;
 
         ~ComponentManager() {
-            for (ComponentGroup* group : groups) {
+            for (ComponentGroup* group : m_groups) {
                 delete group->pool;
                 delete group;
             }
@@ -67,7 +72,7 @@ namespace onip {
             }
             chunk_size += sizeof(ComponentMeta);
             group->pool = new Pool(chunk_size, chunk_size * ONIP_SCENE_COMP_POOL_BLOCK_COUNT);
-            groups.push_back(std::move(group));
+            m_groups.push_back(std::move(group));
         }
 
 
@@ -83,7 +88,7 @@ namespace onip {
 #endif // NDEBUG
 
             uint32_t found = 0;
-            for (ComponentGroup* group : groups) {
+            for (ComponentGroup* group : m_groups) {
                 if (group->comp_ids.size() == ids_size) {
                     for (size_t i = 0; i < ids_size; i++) {
                         for (uint32_t id : group->comp_ids) {
@@ -103,35 +108,36 @@ namespace onip {
 
         template <typename ... _Components>
         Pool* getPoolWhichContains() {
-            uint32_t ids[] = { _Components::getId() ... };
-            size_t ids_size = sizeof(ids) / sizeof(uint32_t);
+            std::vector<uint32_t> comp_ids = { _Components::getId() ... };
+            return getPoolWhichContains(comp_ids);
+        }
 
+        Pool* getPoolWhichContains(const std::vector<uint32_t> comp_ids) {
 #ifndef NDEBUG
-            if (!checkRepeatingIds(ids, ids_size)) {
+            if (!checkRepeatingIds(comp_ids.data(), comp_ids.size())) {
                 return nullptr;
             }
 #endif // NDEBUG
 
             uint32_t found = 0;
-            for (ComponentGroup* group : groups) {
-                for (size_t i = 0; i < ids_size; i++) {
+            for (ComponentGroup* group : m_groups) {
+                for (size_t i = 0; i < comp_ids.size(); i++) {
                     for (uint32_t id : group->comp_ids) {
-                        if (ids[i] == id) {
+                        if (comp_ids[i] == id) {
                             found++;
                             continue;
                         }
                     }
                 }
-                if (found == ids_size) {
+                if (found == comp_ids.size()) {
                     return group->pool;
                 }
             }
-
             return nullptr;
         }
 
-        template <typename _Component, typename ... Args>
-        _Component* addComponent(Entity* entity, Args ... comp_constructor_args) {
+        template <typename _Component, typename ... _Args>
+        _Component* addComponent(Entity* entity, _Args ... comp_constructor_args) {
             Pool* pool = getPoolWhichContains<_Component>();
             if (pool != nullptr) {
                 ComponentMeta* meta = static_cast<ComponentMeta*>(pool->allocateData());
@@ -145,8 +151,99 @@ namespace onip {
             }
             return nullptr;
         }
+
+        template <typename _Component>
+        _Component* getComponent(Entity* entity) {
+            if (doesEntityHaveCompId(entity, _Component::getId())) {
+                ComponentMeta* meta = getComponentMeta(entity, _Component::getId());
+                return getCompFromMeta<_Component>(meta);
+            }
+            return nullptr;
+        }
+
+        ComponentMeta* getComponentMeta(Entity* entity, uint32_t comp_id, Pool* target_pool = nullptr) {
+            if (target_pool == nullptr) {
+                target_pool = getPoolWhichContains(std::vector<uint32_t>(comp_id));;
+            }
+            if (doesEntityHaveCompId(entity, comp_id)) {
+                if (target_pool->getAllocations() > 0) {
+                    for (void* ptr : *target_pool) {
+                        if (Pool::isNull(ptr)) {
+                            continue;
+                        }
+
+                        ComponentMeta* meta = static_cast<ComponentMeta*>(ptr);
+                        if (meta->comp_id == comp_id) {
+                            if (meta->entity->uuid == entity->uuid) {
+                                return meta;
+                            }
+                        }
+                    }
+                }
+            }
+            return nullptr;
+        }
+
+        template <typename _Component>
+        void destroyComponent(_Component* component) {
+            ComponentMeta* meta = getMetaFromComp(component);
+            Pool* target_pool = getPoolWhichContains<_Component>();
+            m_destroying.push_back(new ComponentDestroyingData { meta, target_pool });
+        }
+
+        template <typename _Component>
+        ONIP_INLINE bool destroyComponent(Entity* entity) {
+            return destroyComponent(entity, _Component::getId());
+        }
+
+        bool destroyComponent(Entity* entity, uint32_t component_id) {
+            if (doesEntityHaveCompId(entity, component_id)) {
+                Pool* target_pool = getPoolWhichContains(std::vector<uint32_t>(component_id));
+                ONIP_ASSERT_FMT(target_pool, "something seriously has gone wrong, somehow, you were able to add the component: Id: %u, to a pool that was never created, therefore cannot destroy component", component_id);
+                m_destroying.push_back(new ComponentDestroyingData { });
+                return true;
+            }
+            return false;
+        }
+
+        void clearDestroyBuffer() {
+        }
+
+        void debugPrintComponents() {
+#ifndef NDEBUG
+            std::cout << "Debug Print Components\n";
+            uint32_t group_index = 0;
+            for (ComponentGroup* group : m_groups) {
+                std::cout  << "\n[" << group_index << "]: Component Group Ids: ";
+                for (uint32_t& id : group->comp_ids) {
+                    std::cout << id << ", ";
+                }
+                std::cout << "\n";
+
+                uint32_t released_fround = 0;
+                for (void* ptr : *group->pool) {
+                    if (Pool::isNull(ptr)) {
+                        if (released_fround == group->pool->getAllocationReleased()) {
+                            break;
+                        }
+                        released_fround++;
+                        continue;
+                    }
+
+                    ComponentMeta* meta = static_cast<ComponentMeta*>(ptr);
+                    std::cout << "Id: " << meta->comp_id << "\tEntity UUID: " << meta->entity->uuid;
+                    if (meta->entity->tag != nullptr) {
+                        std::cout << "\tEntity Tag: " << *meta->entity->tag;
+                    }
+                    std::cout << "\n";
+                }
+                std::cout << "\n";
+                group_index++;
+            }
+#endif // NDEBUG
+        }
     private:
-        bool checkRepeatingIds(uint32_t ids[], size_t ids_size) {
+        bool checkRepeatingIds(const uint32_t ids[], size_t ids_size) {
             for (size_t i = 0; i < ids_size; i++) {
                 for (size_t j = 0; j < ids_size; j++) {
                     if (i != j) {
@@ -159,7 +256,21 @@ namespace onip {
             }
             return true;
         }
-        std::vector<ComponentGroup*> groups {};
+
+        bool doesEntityHaveCompId(Entity* entity, uint32_t comp_id) {
+            bool found = false;
+            for (EntityComponentData* data : entity->components) {
+                if (comp_id == data->comp_id) {
+                    found = true;
+                    break;
+                }
+            }
+            return found;
+        }
+
+        std::vector<ComponentGroup*> m_groups {};
+        std::vector<ComponentDestroyingData*> m_destroying;
+
     };
 }
 

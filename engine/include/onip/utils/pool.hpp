@@ -52,6 +52,7 @@ namespace onip {
         ONIP_INLINE size_t getSizeInBytes() const { return (sizeof(Chunk) + m_chunk_size) * m_blocks.size() * m_block_size; }
         ONIP_INLINE size_t getBlockAllocations() const { return m_blocks.size(); }
         ONIP_INLINE size_t getAllocations() const { return m_allocations; }
+        ONIP_INLINE size_t getAllocationReleased() const { return m_released.size(); }
         
         Iterator begin();
         Iterator end();

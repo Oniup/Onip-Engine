@@ -31,7 +31,7 @@ void Editor::initializeLayers() {
     Ecs::addComponent<SpriteRenderer>(entity);
     Ecs::addComponent<Camera>(entity);
 
-    for (EntityComponentData* data : entity->components) {
-        std::cout << "id: " << data->comp_id << "\n";
-    }
+    Transform* transform = Ecs::getComponent<Transform>(entity);
+
+    Ecs::debugPrintComponentGroups();
 }

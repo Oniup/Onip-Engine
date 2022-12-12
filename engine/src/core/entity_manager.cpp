@@ -5,12 +5,12 @@ namespace onip {
         delete m_entities;
     }
 
-    Entity* EntityManager::createEntity(const std::string* tag, uint32_t layer, bool is_dynamic) {
+    Entity* EntityManager::createEntity(const char* tag, uint32_t layer, bool is_dynamic) {
         Entity* entity = m_entities->allocateData<Entity>();
         entity->layer = layer;
         entity->is_dynamic = is_dynamic;
         if (tag != nullptr) {
-            entity->tag = new std::string(*tag);
+            entity->tag = new std::string(tag);
         }
         else {
             entity->tag = nullptr;
