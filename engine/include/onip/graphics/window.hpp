@@ -41,6 +41,7 @@ namespace onip {
             Config_UpdateViewportPerFrame   = 0x200,
             Config_DisableClearingScreen    = 0x400
         };
+
         Window() = default;
         Window(const glm::ivec2& size, const char* title);
         Window(const glm::ivec2& size, const char* title, Config config);
@@ -54,32 +55,32 @@ namespace onip {
         Window& operator=(const Window& other);
         Window& operator=(Window&& other);
     
-        ONIP_INLINE GLFWwindow* internal_window() const { return m_internal; }
-        ONIP_INLINE const glm::ivec2& size() const { return m_size; }
-        ONIP_INLINE const glm::ivec2& position() const { return m_position; }
-        ONIP_INLINE const std::string& title() const { return m_title; }
-        ONIP_INLINE Resolution resolution() const { return m_resolution; }
-        ONIP_INLINE Config config() const { return m_config; }
-        ONIP_INLINE const glm::vec4& clear_color() const { return m_clear_color; }
-        ONIP_INLINE const glm::ivec2& viewport_offset() const { return m_viewport_offset; }
+        ONIP_INLINE GLFWwindow* internalWindow() const { return m_internal; }
+        ONIP_INLINE const glm::ivec2& getSize() const { return m_size; }
+        ONIP_INLINE const glm::ivec2& getPosition() const { return m_position; }
+        ONIP_INLINE const std::string& getTitle() const { return m_title; }
+        ONIP_INLINE Resolution getResolution() const { return m_resolution; }
+        ONIP_INLINE Config getConfig() const { return m_config; }
+        ONIP_INLINE const glm::vec4& getClearColor() const { return m_clear_color; }
+        ONIP_INLINE const glm::ivec2& getViewportOffset() const { return m_viewport_offset; }
     
-        void set_config(Config config);
-        void resolution_in_pixels(Resolution resolution, int* width, int* height) const;
-        bool closing();
-        void clear_screen() const;
+        void setConfig(Config config);
+        void getResolutionInPixels(Resolution resolution, int* width, int* height) const;
+        bool isClosing();
+        void clearScreen() const;
     private:
-        void initialize();
+        void initInstance();
     
         static bool s_InitializedGlad;
     
-        GLFWwindow* m_internal = nullptr;
-        glm::ivec2 m_size;
-        glm::ivec2 m_position;
-        std::string m_title;
-        Resolution m_resolution = Resolution_Custom;
-        Config m_config = Config_None;
-        glm::vec4 m_clear_color = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
-        glm::ivec2 m_viewport_offset;
+        GLFWwindow* m_internal { nullptr };
+        glm::ivec2 m_size { 0, 0 };
+        glm::ivec2 m_position { 0, 0 };
+        std::string m_title {};
+        Resolution m_resolution { Resolution_None };
+        Config m_config { Config_None };
+        glm::vec4 m_clear_color {glm::vec4(0.0f, 0.0f, 0.0f, 1.0f) };
+        glm::ivec2 m_viewport_offset { 0, 0 };
     };
 }
 

@@ -13,7 +13,7 @@ namespace onip {
     
     Window::Window(const glm::ivec2& size, const char* title, Config config)
         : m_internal(nullptr), m_size(size), m_position(), m_title(title), m_resolution(Resolution_Custom), m_config(config) {
-        initialize();
+        initInstance();
     }
     
     Window::Window(const char* title, Config config)
@@ -21,7 +21,7 @@ namespace onip {
     
     Window::Window(const char* title, Resolution resolution, Config config)
         : m_internal(nullptr), m_size({ -1, -1 }), m_position(), m_title(title), m_resolution(resolution), m_config(config) {
-        initialize();
+        initInstance();
     }
     
     Window::Window(const char* title, Resolution resolution)
@@ -30,7 +30,7 @@ namespace onip {
     Window::Window(const Window& other)
         : m_internal(nullptr), m_size(other.m_size), m_position(other.m_position), m_title(other.m_title), 
           m_resolution(other.m_resolution), m_config(other.m_config), m_viewport_offset(other.m_viewport_offset) {
-        initialize();
+        initInstance();
     }
     
     Window::Window(Window&& other)
@@ -61,7 +61,7 @@ namespace onip {
         m_clear_color = other.m_clear_color;
         m_viewport_offset = other.m_viewport_offset;
     
-        initialize();
+        initInstance();
         return *this;
     }
     
@@ -83,7 +83,7 @@ namespace onip {
         return *this;
     }
     
-    void Window::set_config(Config config) {
+    void Window::setConfig(Config config) {
         switch (config) {
         case Config_None:
             return;
@@ -144,7 +144,7 @@ namespace onip {
         }
     }
     
-    void Window::resolution_in_pixels(Resolution resolution, int* width, int* height) const {
+    void Window::getResolutionInPixels(Resolution resolution, int* width, int* height) const {
         switch (resolution) {
             case Resolution_Auto: {
                 GLFWmonitor* monitor = glfwGetPrimaryMonitor();
@@ -201,11 +201,11 @@ namespace onip {
         }
     }
     
-    bool Window::closing() {
+    bool Window::isClosing() {
         return glfwWindowShouldClose(m_internal);
     }
     
-    void Window::clear_screen() const {
+    void Window::clearScreen() const {
         if (!(m_config & Config_DisableClearingScreen)) {
             glClearColor(m_clear_color[0], m_clear_color[1], m_clear_color[2], m_clear_color[3]);
             if (m_config & Config_EnableDepthTesting) {
@@ -223,7 +223,7 @@ namespace onip {
         }
     }
     
-    void Window::initialize() {
+    void Window::initInstance() {
         glfwWindowHint(GLFW_VERSION_MAJOR, 4);
         glfwWindowHint(GLFW_VERSION_MINOR, 5);
     #ifdef __APPLE__
@@ -247,7 +247,7 @@ namespace onip {
         }
         else {
             if (m_resolution != Resolution_Custom) {
-                resolution_in_pixels(m_resolution, &m_size[0], &m_size[1]);
+                getResolutionInPixels(m_resolution, &m_size[0], &m_size[1]);
             }
             else if (m_size[0] == -1) {
                 m_size = { 

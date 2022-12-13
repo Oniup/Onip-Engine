@@ -10,7 +10,7 @@ public:
     Editor();
     ~Editor();
 
-    void initialize_layers() override;
+    void initializeLayers() override;
 };
 
 #endif // __ONIP_EDITOR_CORE_EDITOR_HPP__

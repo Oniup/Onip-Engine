@@ -3,7 +3,7 @@
 
 namespace onip {
     struct Input {
-        static void poll_events();
+        static void pollEvents();
     };
 }
 

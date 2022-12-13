@@ -2,9 +2,8 @@
 #define __ONIP_CONFIG_HPP__
 
 // Ecs
-#define ONIP_SCENE_COMP_POOL_CHUNK_SIZE 128
-#define ONIP_SCENE_COMP_POOL_BLOCK_SIZE 500
-#define ONIP_SCENE_ENIT_POOL_BLOCK_SIZE 300
+#define ONIP_SCENE_COMP_POOL_BLOCK_COUNT 50
+#define ONIP_SCENE_ENIT_POOL_BLOCK_COUNT 100
 
 // Debug
 #define ONIP_DEBUG_COMPILE_FUNCTIONS 1
@@ -18,9 +17,9 @@
 namespace onip {
     struct Config { 
         // Application instance that you inherited, return that
-        static class Application* application();
+        static class Application* settingsApplication();
         // defines the components that every entity will be assigned with when it is created
-        static void default_components(class Entity* entity);
+        static void settingDefaultComponents(struct Entity* entity);
     };
 }
 

@@ -44,44 +44,45 @@ namespace onip {
         ~Pool();
 
         ONIP_INLINE static constexpr Byte null() { return static_cast<Byte>(-1); }
-        ONIP_INLINE static bool is_null(void* ptr) { return *static_cast<Byte*>(ptr) == null(); }
+        ONIP_INLINE static bool isNull(void* ptr) { return *static_cast<Byte*>(ptr) == null(); }
 
-        ONIP_INLINE size_t chunk_size() const { return m_chunk_size; }
-        ONIP_INLINE size_t block_size() const { return m_block_size; }
-        ONIP_INLINE size_t size() const { return m_blocks.size() * m_block_size; }
-        ONIP_INLINE size_t size_in_bytes() const { return (sizeof(Chunk) + m_chunk_size) * m_blocks.size() * m_block_size; }
-        ONIP_INLINE size_t block_allocations() const { return m_blocks.size(); }
-        ONIP_INLINE size_t allocations() const { return m_allocations; }
+        ONIP_INLINE size_t getChunkSize() const { return m_chunk_size; }
+        ONIP_INLINE size_t getBlockSize() const { return m_block_size; }
+        ONIP_INLINE size_t getSize() const { return m_blocks.size() * m_block_size; }
+        ONIP_INLINE size_t getSizeInBytes() const { return (sizeof(Chunk) + m_chunk_size) * m_blocks.size() * m_block_size; }
+        ONIP_INLINE size_t getBlockAllocations() const { return m_blocks.size(); }
+        ONIP_INLINE size_t getAllocations() const { return m_allocations; }
+        ONIP_INLINE size_t getAllocationReleased() const { return m_released.size(); }
         
         Iterator begin();
         Iterator end();
 
-        void* allocate();
-        void release(void* ptr);
+        void* allocateData();
+        void releaseData(void* ptr);
 
-        template <typename _Object>
-        _Object* allocate() {
-            _Object* object = static_cast<_Object*>(allocate());
-            new (object) _Object{};
+        template <typename _Object, typename ... _Args>
+        _Object* allocateData(_Args ... args) {
+            _Object* object = static_cast<_Object*>(allocateData());
+            new (object) _Object{ args ... };
             return object;
         }
 
         template <typename _Object>
-        void release(_Object* ptr) {
+        void releaseData(_Object* ptr) {
             ptr->~_Object();
-            release(static_cast<void*>(ptr));
+            releaseData(static_cast<void*>(ptr));
         }
     private:
-        Chunk* allocate_block();
-        void set_chunk_default(Chunk* chunk, const size_t& size);
+        Chunk* allocateBlock();
+        void setChunkDefault(Chunk* chunk, const size_t& size);
 
-        size_t m_chunk_size = 0;
-        size_t m_block_size = 0;
-        size_t m_allocations = 0;
-        Chunk* m_next = nullptr;
-        Chunk* m_tail = nullptr;
-        std::list<void*> m_blocks;
-        std::vector<void*> m_released;
+        size_t m_chunk_size { 0 };
+        size_t m_block_size { 0 };
+        size_t m_allocations { 0 };
+        Chunk* m_next { nullptr };
+        Chunk* m_tail { nullptr };
+        std::list<void*> m_blocks {};
+        std::vector<void*> m_released {};
     };
 }
 

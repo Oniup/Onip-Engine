@@ -5,7 +5,7 @@
 #include <GLFW/glfw3.h>
 
 namespace onip {
-    void Input::poll_events() {
+    void Input::pollEvents() {
         glfwPollEvents();
     }
 }
