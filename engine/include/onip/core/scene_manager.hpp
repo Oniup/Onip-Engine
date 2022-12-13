@@ -13,6 +13,13 @@
 #include <string_view>
 
 namespace onip {
+    class CustomSystem {
+    public:
+        ONIP_INLINE virtual std::string_view getName() = 0;
+
+        virtual void onUpdate() = 0;
+    };
+
     struct Scene {
         Scene() = default;
         ~Scene() = default;
@@ -21,6 +28,7 @@ namespace onip {
         uint32_t scene_index { 0 };
         EntityManager entity_manager {};
         ComponentManager component_manager {};
+        std::vector<CustomSystem*> systems {};
     };
 
     class SceneManager : public ApplicationLayer {
@@ -35,6 +43,9 @@ namespace onip {
         ONIP_INLINE static void loadEmpty() { Application::getSceneManager()->implLoadEmpty(); }
         ONIP_INLINE static void loadExisting(std::string_view scene_path) { Application::getSceneManager()->implLoadExisting(scene_path); }
         ONIP_INLINE static void serialize(Scene* scene) { Application::getSceneManager()->implSerialize(scene); }
+        ONIP_INLINE static void pushScene(CustomSystem* system) { Application::getSceneManager()->getActiveScene()->systems.push_back(system); }
+
+        void onUpdate() override;
     private:
         void implSetActive(std::string_view scene_name);
         void implLoadEmpty();
@@ -48,6 +59,11 @@ namespace onip {
     struct Ecs {
         template <typename _Component, typename ... _Args>
         ONIP_INLINE static _Component* addComponent(Entity* entity, _Args ... comp_constructor_args) { return Application::getSceneManager()->getActiveScene()->component_manager.addComponent<_Component>(entity, comp_constructor_args...); }
+        template <typename _Component>
+        ONIP_INLINE static bool destroyComponent(Entity* entity) { return Application::getSceneManager()->getActiveScene()->component_manager.destroyComponent<_Component>(entity); }
+        template <typename _Component>
+        ONIP_INLINE static void destroyComponent(_Component* component) { return Application::getSceneManager()->getActiveScene()->component_manager.destroyComponent<_Component>(component); }
+        ONIP_INLINE static bool destroyComponent(Entity* entity, uint32_t component_id) { return Application::getSceneManager()->getActiveScene()->component_manager.destroyComponent(entity, component_id); }
         template <typename ... _Components> 
         ONIP_INLINE static void createComponentGroup() { Application::getSceneManager()->getActiveScene()->component_manager.createGroup<_Components...>(); }
         template <typename _Component>

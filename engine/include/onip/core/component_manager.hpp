@@ -12,6 +12,7 @@ namespace onip {
     struct ComponentMeta {
         uint32_t comp_id {};
         Entity* entity { nullptr };
+        void (*on_destroy)(ComponentMeta* self);
     };
 
     class ComponentManager {
@@ -23,7 +24,7 @@ namespace onip {
 
         struct ComponentDestroyingData {
             ComponentMeta* meta { nullptr };
-            Pool* target_pool { nullptr };
+            Pool* pool { nullptr };
         };
     public:
         ComponentManager() = default;
@@ -143,6 +144,7 @@ namespace onip {
                 ComponentMeta* meta = static_cast<ComponentMeta*>(pool->allocateData());
                 meta->comp_id = _Component::getId();
                 meta->entity = entity;
+                meta->on_destroy = nullptr;
                 _Component* comp = getCompFromMeta<_Component>(meta);
 
                 new (comp) _Component { comp_constructor_args ... };
@@ -197,16 +199,33 @@ namespace onip {
         }
 
         bool destroyComponent(Entity* entity, uint32_t component_id) {
-            if (doesEntityHaveCompId(entity, component_id)) {
+            ComponentMeta* meta = nullptr;
+            if (doesEntityHaveCompId(entity, component_id, meta)) {
                 Pool* target_pool = getPoolWhichContains(std::vector<uint32_t>(component_id));
                 ONIP_ASSERT_FMT(target_pool, "something seriously has gone wrong, somehow, you were able to add the component: Id: %u, to a pool that was never created, therefore cannot destroy component", component_id);
-                m_destroying.push_back(new ComponentDestroyingData { });
+                m_destroying.push_back(ComponentDestroyingData { meta, target_pool });
                 return true;
             }
             return false;
         }
 
-        void clearDestroyBuffer() {
+        void clearDestroyedBuffer() {
+            for (ComponentDestroyingData& destroying : m_destroying) {
+                if (destroying.meta->on_destroy != nullptr) {
+                    destroying.meta->on_destroy(destroying.meta);
+                }
+                // removing the component reference from the entity
+                uint32_t target_index = 0;
+                for (; target_index < destroying.meta->entity->components->size(); target_index++) {
+                    if (destroying.meta->entity->components->at(target_index).comp_id == destroying.meta->comp_id) {
+                        break;
+                    }
+                }
+                destroying.meta->entity->components->erase(destroying.meta->entity->components->begin() + target_index);
+
+                destroying.pool->releaseData(destroying.meta);
+            }
+            m_destroying.clear();
         }
 
         void debugPrintComponents() {
@@ -259,8 +278,23 @@ namespace onip {
 
         bool doesEntityHaveCompId(Entity* entity, uint32_t comp_id) {
             bool found = false;
-            for (EntityComponentData* data : entity->components) {
-                if (comp_id == data->comp_id) {
+            for (EntityComponentData& data : *entity->components) {
+                if (comp_id == data.comp_id) {
+                    found = true;
+                    break;
+                }
+            }
+            return found;
+        }
+
+        bool doesEntityHaveCompId(Entity* entity, uint32_t comp_id, ComponentMeta*& meta) {
+            bool found = false;
+            for (EntityComponentData& data : *entity->components) {
+                if (comp_id == data.comp_id) {
+                    Byte* byte_data = static_cast<Byte*>(data.data);
+                    byte_data = byte_data - sizeof(ComponentMeta);
+                    meta = reinterpret_cast<ComponentMeta*>(byte_data);
+
                     found = true;
                     break;
                 }
@@ -269,8 +303,7 @@ namespace onip {
         }
 
         std::vector<ComponentGroup*> m_groups {};
-        std::vector<ComponentDestroyingData*> m_destroying;
-
+        std::vector<ComponentDestroyingData> m_destroying;
     };
 }
 

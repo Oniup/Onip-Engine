@@ -7,8 +7,20 @@ namespace onip {
 
     SceneManager::~SceneManager() {
         for (Scene* scene : m_loaded_scenes) {
+            for (CustomSystem* system : scene->systems) {
+                delete system;
+            }
             delete scene;
         }
+    }
+
+    void SceneManager::onUpdate() {
+        for (CustomSystem* system : m_active_scene->systems) {
+            system->onUpdate();
+        }
+
+        m_active_scene->component_manager.clearDestroyedBuffer();
+        m_active_scene->entity_manager.clearDestroyedBuffer();
     }
 
     void SceneManager::implSetActive(std::string_view scene_name) {

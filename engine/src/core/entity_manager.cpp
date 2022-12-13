@@ -1,4 +1,5 @@
 #include "onip/core/entity_manager.hpp"
+#include "onip/core/scene_manager.hpp"
 
 namespace onip {
     EntityManager::~EntityManager() {
@@ -21,16 +22,15 @@ namespace onip {
     }
 
     void EntityManager::destroyEntity(Entity* entity) {
+        for (EntityComponentData& data : *entity->components) {
+            Ecs::destroyComponent(entity, data.comp_id);
+        }
         m_destroying_entities.push_back(entity);
     }
         
     void EntityManager::clearDestroyedBuffer() {
         for (Entity* entity : m_destroying_entities) {
-            for (EntityComponentData* data : entity->components) {
-                // TODO: destroy all the components attached to the entity ... 
-                delete data;
-            }
-            entity->components.clear();
+            delete entity->components;
             if (entity->tag != nullptr) {
                 delete entity->tag;
             }
