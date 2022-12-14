@@ -21,7 +21,7 @@ namespace onip {
         std::string* tag = { nullptr };
         uint32_t layer = 0;
         bool is_dynamic { true };
-        std::vector<EntityComponentData>* components { new std::vector<EntityComponentData>() };
+        std::vector<EntityComponentData> components {};
     };
 
     class EntityManager {

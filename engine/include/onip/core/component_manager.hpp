@@ -148,7 +148,7 @@ namespace onip {
                 _Component* comp = getCompFromMeta<_Component>(meta);
 
                 new (comp) _Component { comp_constructor_args ... };
-                entity->components.push_back(new EntityComponentData { _Component::getId(), static_cast<void*>(comp) });
+                entity->components.push_back({ _Component::getId(), static_cast<void*>(comp) });
                 return comp;
             }
             return nullptr;
@@ -216,12 +216,12 @@ namespace onip {
                 }
                 // removing the component reference from the entity
                 uint32_t target_index = 0;
-                for (; target_index < destroying.meta->entity->components->size(); target_index++) {
-                    if (destroying.meta->entity->components->at(target_index).comp_id == destroying.meta->comp_id) {
+                for (; target_index < destroying.meta->entity->components.size(); target_index++) {
+                    if (destroying.meta->entity->components.at(target_index).comp_id == destroying.meta->comp_id) {
                         break;
                     }
                 }
-                destroying.meta->entity->components->erase(destroying.meta->entity->components->begin() + target_index);
+                destroying.meta->entity->components.erase(destroying.meta->entity->components.begin() + target_index);
 
                 destroying.pool->releaseData(destroying.meta);
             }
@@ -278,7 +278,7 @@ namespace onip {
 
         bool doesEntityHaveCompId(Entity* entity, uint32_t comp_id) {
             bool found = false;
-            for (EntityComponentData& data : *entity->components) {
+            for (EntityComponentData& data : entity->components) {
                 if (comp_id == data.comp_id) {
                     found = true;
                     break;
@@ -289,7 +289,7 @@ namespace onip {
 
         bool doesEntityHaveCompId(Entity* entity, uint32_t comp_id, ComponentMeta*& meta) {
             bool found = false;
-            for (EntityComponentData& data : *entity->components) {
+            for (EntityComponentData& data : entity->components) {
                 if (comp_id == data.comp_id) {
                     Byte* byte_data = static_cast<Byte*>(data.data);
                     byte_data = byte_data - sizeof(ComponentMeta);

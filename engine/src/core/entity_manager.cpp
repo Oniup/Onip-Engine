@@ -22,7 +22,7 @@ namespace onip {
     }
 
     void EntityManager::destroyEntity(Entity* entity) {
-        for (EntityComponentData& data : *entity->components) {
+        for (EntityComponentData& data : entity->components) {
             Ecs::destroyComponent(entity, data.comp_id);
         }
         m_destroying_entities.push_back(entity);
@@ -30,7 +30,6 @@ namespace onip {
         
     void EntityManager::clearDestroyedBuffer() {
         for (Entity* entity : m_destroying_entities) {
-            delete entity->components;
             if (entity->tag != nullptr) {
                 delete entity->tag;
             }
