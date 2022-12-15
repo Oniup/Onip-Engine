@@ -55,8 +55,6 @@ namespace onip {
         );
 
         glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &m_max_texture_units);
-
-        m_renderers.push_back(new GLBatch());
     }
 
     GLPipeline::~GLPipeline() {

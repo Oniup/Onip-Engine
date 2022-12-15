@@ -14,18 +14,18 @@
 #include <glm/glm.hpp>
 
 namespace onip {
-    struct Vertex {
-        glm::vec3 position;
-        glm::vec3 normal;
-        glm::vec2 uv;
-        uint32_t textureIndex;
-    };
-
     class GLPipeline : public ApplicationLayer {
     public:
         struct Shader;
         struct Texture;
         struct Material;
+
+        struct Vertex {
+            glm::vec3 position;
+            glm::vec3 uv;
+            glm::vec3 normals;
+            Texture* texture;
+        };
 
         enum TextureConfig {
             TextureConfig_Default                       = -1,
@@ -41,24 +41,6 @@ namespace onip {
             TextureConfig_ClampedToBorderWrapping       = 0x200,
         };
 
-        class Renderer {
-        public:
-            enum Type {
-                Type_Batch = 0,
-                Type_Instance,
-            };
-
-            Renderer(Type type)
-                : m_type(type) {}
-
-            const Type getType() const { return m_type; }
-
-            virtual ~Renderer() = default;
-            virtual void onRender() = 0;
-        private:
-            Type m_type;
-        };
-
         GLPipeline();
         ~GLPipeline() override;
 
@@ -69,7 +51,6 @@ namespace onip {
     private:
         Window m_window {};
         int m_max_texture_units {};
-        std::vector<Renderer*> m_renderers {};
 
         std::vector<Shader*> m_shaders {};
         std::vector<Texture*> m_textures {};
