@@ -14,11 +14,20 @@
 #include <glm/glm.hpp>
 
 namespace onip {
-    class GLPipeline : public ApplicationLayer {
+    class GlPipeline : public ApplicationLayer {
     public:
         struct Shader;
         struct Texture;
         struct Material;
+
+        class Renderer {
+        public:
+            virtual ~Renderer() = default;
+            const std::string getName() const { return m_name; }
+            virtual void onDraw() = 0;
+        private:
+            std::string m_name;
+        };
 
         struct Vertex {
             glm::vec3 position;
@@ -28,7 +37,7 @@ namespace onip {
         };
 
         enum TextureConfig {
-            TextureConfig_Default                       = -1,
+            TextureConfig_Default                       = 0x000,
             TextureConfig_FlipVertically                = 0x001,
             TextureConfig_GenerateMipMap                = 0x002,
             TextureConfig_NearestFilteringNearest       = 0x004,
@@ -41,17 +50,23 @@ namespace onip {
             TextureConfig_ClampedToBorderWrapping       = 0x200,
         };
 
-        GLPipeline();
-        ~GLPipeline() override;
+        GlPipeline();
+        ~GlPipeline() override;
 
         ONIP_INLINE const Window* getWindow() const { return &m_window; }
         ONIP_INLINE Window* getWindow() { return &m_window; }
 
+        ONIP_INLINE static Shader* createShader(std::string name, std::string fragment_path, std::string vertex_path) { return Application::getGraphicsPipeline()->implCreateShader(name, fragment_path, vertex_path); }
+        ONIP_INLINE static Texture* createTexture(std::string name, std::string path, TextureConfig config = TextureConfig_Default) { return Application::getGraphicsPipeline()->implCreateTexture(name, path, config); }
+
         void onUpdate() override;
     private:
+        Shader* implCreateShader(std::string name, std::string fragment_path, std::string vertex_path);
+        Texture* implCreateTexture(std::string name, std::string path, TextureConfig config);
+
         Window m_window {};
         int m_max_texture_units {};
-
+        std::vector<Renderer*> m_renderers {};
         std::vector<Shader*> m_shaders {};
         std::vector<Texture*> m_textures {};
         std::vector<Material*> m_materials {};

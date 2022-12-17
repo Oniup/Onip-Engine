@@ -10,7 +10,7 @@ namespace onip {
     }
 
     void Application::run() {
-        m_pipeline = static_cast<GLPipeline*>(addLayer(new GLPipeline()));
+        m_pipeline = static_cast<GlPipeline*>(addLayer(new GlPipeline()));
         m_scene_manager = static_cast<SceneManager*>(addLayer(new SceneManager()));
 
         initializeLayers();
