@@ -64,6 +64,27 @@ namespace onip {
         return range;
     }
 
+    void GlBatchRenderer::pushVertices(UUID entity_id, const std::vector<GlPipeline::Vertex>& vertices) {
+        uint32_t index = 0;
+        BatchReserve* reserve = getReserve(entity_id, &index);
+        reserve->vertices = &vertices;
+        checkIfReserveCanPush(reserve, index);
+    }
+
+    void GlBatchRenderer::pushMaterial(UUID entity_id, const GlPipeline::Material* material) {
+        uint32_t index = 0;
+        BatchReserve* reserve = getReserve(entity_id, &index);
+        reserve->material = material;
+        checkIfReserveCanPush(reserve, index);
+    }
+
+    void GlBatchRenderer::pushTransform(UUID entity_id, const Transform* transform) {
+        uint32_t index = 0;
+        BatchReserve* reserve = getReserve(entity_id, &index);
+        reserve->transform = transform;
+        checkIfReserveCanPush(reserve, index);
+    }
+
     void GlBatchRenderer::onDraw() {
     }
 
@@ -90,5 +111,31 @@ namespace onip {
 
             glBindVertexArray(0);
         }
+    }
+
+    void GlBatchRenderer::checkIfReserveCanPush(BatchReserve* reserve, uint32_t index) {
+        if (reserve->transform != nullptr) {
+            if (reserve->material != nullptr) {
+                if (reserve->vertices != nullptr) {
+                    pushVertices(*reserve->vertices, reserve->material, reserve->transform);
+                    m_reserves.erase(m_reserves.begin() + index);
+                }
+            }
+        }
+    }
+
+    GlBatchRenderer::BatchReserve* GlBatchRenderer::getReserve(UUID uuid, uint32_t* index) {
+        uint32_t i = 0;
+        for (; i < m_reserves.size(); i++) {
+            if (m_reserves[i].entity_id == uuid) {
+                if (index != nullptr) {
+                    *index = i;
+                }
+                return &m_reserves[i];
+            }
+        }
+
+        m_reserves.push_back({});
+        return &m_reserves.back();
     }
 }

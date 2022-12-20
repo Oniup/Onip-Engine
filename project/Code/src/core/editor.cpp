@@ -26,11 +26,11 @@ Editor::Editor() {
 Editor::~Editor() {
 }
 
-void Editor::initializeLayers() {
+void Editor::initializeRequirements() {
     GlPipeline::createRenderer(new GlBatchRenderer());
     SceneManager::loadEmpty();
 
-    Ecs::addCustomSystem<ObtainGraphicsVertexData>();
+    Ecs::addCustomSystem<GraphicsVerticesHandler>();
 
     Ecs::createComponentGroup<Camera, Transform, SpriteRenderer, MeshRenderer>();
     entity = Ecs::createEntity("Player");

@@ -7,6 +7,7 @@
 
 #include <iostream>
 #include <vector>
+#include <tuple>
 
 namespace onip {
     struct ComponentMeta {
@@ -25,6 +26,11 @@ namespace onip {
         struct ComponentDestroyingData {
             ComponentMeta* meta { nullptr };
             Pool* pool { nullptr };
+        };
+
+        struct ComponentIter {
+            uint32_t index;
+            Pool* currentIter { nullptr };
         };
     public:
         ComponentManager() = default;
@@ -113,7 +119,7 @@ namespace onip {
             return getPoolWhichContains(comp_ids);
         }
 
-        Pool* getPoolWhichContains(const std::vector<uint32_t> comp_ids) {
+        Pool* getPoolWhichContains(const std::vector<uint32_t>& comp_ids) {
 #ifndef NDEBUG
             if (!checkRepeatingIds(comp_ids.data(), comp_ids.size())) {
                 return nullptr;

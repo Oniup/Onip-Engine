@@ -9,7 +9,7 @@ namespace onip {
     struct Transform {
         Transform() = default;
         ~Transform() = default;
-        static uint32_t getId() { return 0; }
+        static constexpr uint32_t getId() { return 0; }
 
         glm::vec3 position { glm::vec3(0.0f, 0.0f, 0.0f) };
         glm::vec3 scale { glm::vec3(1.0f, 1.0f, 1.0f) };
@@ -19,7 +19,7 @@ namespace onip {
     struct SpriteRenderer {
         SpriteRenderer() = default;
         ~SpriteRenderer() = default;
-        static uint32_t getId() { return 1; }
+        static constexpr uint32_t getId() { return 1; }
 
         std::array<uint32_t, 4> vertices;
     };
@@ -29,7 +29,7 @@ namespace onip {
         ~MeshRenderer() {
             delete vertices;
         }
-        static uint32_t getId() { return 2; }
+        static constexpr uint32_t getId() { return 2; }
 
         std::vector<uint32_t>* vertices { new std::vector<uint32_t>() };
     };
@@ -37,7 +37,7 @@ namespace onip {
     struct Camera {
         Camera() = default;
         ~Camera() = default;
-        static uint32_t getId() { return 3; }
+        static constexpr uint32_t getId() { return 3; }
 
         glm::vec3 up { glm::vec3(0.0f, 1.0f, 0.0f) };
         glm::vec3 forward { glm::vec3(0.0f, 0.0f, 1.0f) };

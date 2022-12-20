@@ -15,7 +15,7 @@ namespace onip {
         static ONIP_INLINE class GlPipeline* getGraphicsPipeline() { return getInstance()->m_pipeline; }
         static ONIP_INLINE class SceneManager* getSceneManager() { return getInstance()->m_scene_manager; }
 
-        virtual void initializeLayers() {}
+        virtual void initializeRequirements() {}
 
         void run();
         ApplicationLayer* addLayer(ApplicationLayer* layer);

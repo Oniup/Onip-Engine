@@ -13,7 +13,7 @@ namespace onip {
         m_pipeline = static_cast<GlPipeline*>(addLayer(new GlPipeline()));
         m_scene_manager = static_cast<SceneManager*>(addLayer(new SceneManager()));
 
-        initializeLayers();
+        initializeRequirements();
         while (!GlPipeline::getWindow()->isClosing()) {
             Input::pollEvents();
             for (ApplicationLayer* layer : m_layers) {
