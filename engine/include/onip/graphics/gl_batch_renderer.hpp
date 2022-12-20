@@ -3,10 +3,46 @@
 
 #include "onip/graphics/gl_pipeline.hpp"
 #include "onip/utils/utils.hpp"
+#include "onip/components/graphics_comps.hpp"
 
 #include <glm/glm.hpp>
+#include <vector>
 
 namespace onip {
+    class GlBatchRenderer : public GlPipeline::Renderer {
+    private:
+        struct Vertex {
+            float position[3] { 0.0f, 0.0f, 0.0f };
+            float uv[2] { 0.0f, 0.0f };
+            float normals[3] { 0.0f, 0.0f, 0.0f };
+            float material_id {};
+            float transform_id {};
+        };
+
+        struct Batch {
+            std::vector<Vertex> vertex_data {};
+            std::vector<uint32_t> indices_data {};
+            std::vector<const GlPipeline::Material*> materials {};
+            std::vector<const Transform*> transforms {};
+            const GlPipeline::Shader* shader { nullptr };
+        };
+    public:
+        struct VertexRange {
+            size_t start_index {};
+            size_t end_index {};
+        };
+
+        GlBatchRenderer();
+        ~GlBatchRenderer();
+
+        VertexRange pushVertices(const std::vector<GlPipeline::Vertex>& vertices, const GlPipeline::Material* material, const Transform* transform);
+        void onDraw() override;
+    private:
+        void initializeVertexBuffers();
+
+        uint32_t m_buffers[3] { 0, 0, 0 };
+        std::vector<Batch*> m_batches;
+    };
 }
 
 #endif // __ONIP_GRAPHICS_GL_BATCH_RENDERER_HPP__

@@ -14,12 +14,12 @@ namespace onip {
         m_scene_manager = static_cast<SceneManager*>(addLayer(new SceneManager()));
 
         initializeLayers();
-        while (!m_pipeline->getWindow()->isClosing()) {
+        while (!GlPipeline::getWindow()->isClosing()) {
             Input::pollEvents();
             for (ApplicationLayer* layer : m_layers) {
                 layer->onUpdate();
             }
-            m_pipeline->getWindow()->clearScreen();
+            GlPipeline::getWindow()->clearScreen();
         }
         destroyLayers();
     }

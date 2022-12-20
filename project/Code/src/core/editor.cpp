@@ -4,9 +4,12 @@
 #include <onip/core/scene_manager.hpp>
 #include <onip/utils/pool.hpp>
 #include <onip/components/graphics_comps.hpp>
+#include <onip/systems/vertex_extraction.hpp>
 #include <glm/glm.hpp>
 
 using namespace onip;
+
+static Entity* entity = nullptr;
 
 Application* Config::settingsApplication() {
     static Editor editor;
@@ -24,10 +27,13 @@ Editor::~Editor() {
 }
 
 void Editor::initializeLayers() {
+    GlPipeline::createRenderer(new GlBatchRenderer());
     SceneManager::loadEmpty();
 
+    Ecs::addCustomSystem<ObtainGraphicsVertexData>();
+
     Ecs::createComponentGroup<Camera, Transform, SpriteRenderer, MeshRenderer>();
-    Entity* entity = Ecs::createEntity("Player");
+    entity = Ecs::createEntity("Player");
     Ecs::addComponent<SpriteRenderer>(entity);
     Ecs::addComponent<Camera>(entity);
 

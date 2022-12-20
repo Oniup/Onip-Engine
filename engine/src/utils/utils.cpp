@@ -9,7 +9,7 @@
 static_assert((RAND_MAX & (RAND_MAX + 1u)) == 0, "RAND_MAX not a Mersenne number");
 
 namespace onip {
-    int Utils::rand_int32() {
+    int Utils::randInt32() {
         return rand();
     }
 

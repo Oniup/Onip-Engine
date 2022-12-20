@@ -8,45 +8,6 @@
 #include <stb/stb_image.h>
 
 namespace onip {
-    struct GlPipeline::Shader {
-        ~Shader() {
-            glDeleteShader(id);
-        }
-
-        std::string name {};
-        uint32_t id {};
-#if ONIP_GRAPHICS_TYPES_STORE_PATH
-        std::string path[2] { {}, {} };
-#endif // ONIP_GRAPHICS_TYPES_STORE_PATH
-    };
-
-    struct GlPipeline::Texture {
-        ~Texture() {
-            glDeleteTextures(1, &id);
-        }
-
-        std::string name {};
-        uint32_t id { 0 };
-        int width { 0 };
-        int height { 0 };
-        int channels { 0 };
-        TextureConfig config { TextureConfig_Default };
-#if ONIP_GRAPHICS_TYPES_STORE_PATH
-        std::string path { };
-#endif // ONIP_GRAPHICS_TYPES_STORE_PATH
-    };
-
-    struct GlPipeline::Material {
-        ~Material() = default;
-
-        std::string name {};
-        uint32_t shaderName { 0 };
-        std::vector<uint32_t> textureIds {};
-#if ONIP_GRAPHICS_TYPES_STORE_PATH
-        std::string path {};
-#endif // ONIP_GRAPHICS_TYPES_STORE_PATH
-    };
-
     GlPipeline::GlPipeline()
         : ApplicationLayer("Graphics GLPipeline") {
         assert(glfwInit() && "failed to initialize glfw for some reason ...");
@@ -71,15 +32,15 @@ namespace onip {
         for (Shader* shader : m_shaders) {
             delete shader;
         }
-
         for (Texture* texture : m_textures) {
             delete texture;
         }
-
         for (Material* material : m_materials) {
             delete material;
         }
-
+        for (Renderer* renderer : m_renderers) {
+            delete renderer;
+        }
         m_window.~Window();
         glfwTerminate();
     }
@@ -88,6 +49,14 @@ namespace onip {
         for (Renderer* renderer : m_renderers) {
             renderer->onDraw();
         }
+    }
+
+    GlPipeline::Shader::~Shader() {
+        glDeleteProgram(id);
+    }
+
+    GlPipeline::Texture::~Texture() {
+        glDeleteTextures(1, &id);
     }
 
     GlPipeline::Shader* GlPipeline::implCreateShader(std::string name, std::string fragment_path, std::string vertex_path) {
@@ -213,5 +182,37 @@ namespace onip {
         result->path = path;
 #endif // NDEBUG
         return m_textures.back();
+    }
+
+    GlPipeline::Renderer* GlPipeline::implCreateRenderer(Renderer*&& renderer) {
+        m_renderers.push_back(std::move(renderer));
+        return m_renderers.back();
+    }
+
+    GlPipeline::Renderer* GlPipeline::implGetRenderer(std::string_view name) {
+        for (Renderer* renderer : m_renderers) {
+            if (renderer->getName() == name) {
+                return renderer;
+            }
+        }
+        return nullptr;
+    }
+
+    GlPipeline::Shader* GlPipeline::implGetShader(std::string_view name) {
+        for (Shader* shader : m_shaders) {
+            if (shader->name == name) {
+                return shader;
+            }
+        }
+        return nullptr;
+    }
+
+    GlPipeline::Texture* GlPipeline::implGetTexture(std::string_view name) {
+        for (Texture* texture : m_textures) {
+            if (texture->name == name) {
+                return texture;
+            }
+        }
+        return nullptr;
     }
 }

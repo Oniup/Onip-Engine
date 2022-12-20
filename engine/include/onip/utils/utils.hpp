@@ -41,7 +41,7 @@ namespace onip {
             return a > b ? b : a;
         }
 
-        static int rand_int32();
+        static int randInt32();
         static uint32_t randUint32();
         static uint64_t randUint64();
     };

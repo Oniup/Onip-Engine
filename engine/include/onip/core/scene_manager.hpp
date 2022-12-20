@@ -15,7 +15,7 @@
 namespace onip {
     class CustomSystem {
     public:
-        ONIP_INLINE virtual std::string_view getName() = 0;
+        ONIP_INLINE virtual const char* getName() = 0;
 
         virtual void onUpdate() = 0;
     };
@@ -79,6 +79,9 @@ namespace onip {
         ONIP_INLINE static Entity* createEntity(const char* tag, bool is_dynamic = true) { return Application::getSceneManager()->getActiveScene()->entity_manager.createEntity(tag, 0, is_dynamic); }
         ONIP_INLINE static Entity* createEntity(uint32_t layer, bool is_dynamic = true) { return Application::getSceneManager()->getActiveScene()->entity_manager.createEntity(nullptr, layer, is_dynamic); }
         ONIP_INLINE static Entity* createEntity(const char* tag, uint32_t layer, bool is_dynamic = true) { return Application::getSceneManager()->getActiveScene()->entity_manager.createEntity(tag, layer, is_dynamic); }
+
+        template <typename _System, typename ... _Args>
+        ONIP_INLINE static void addCustomSystem(_Args ... args) { Application::getSceneManager()->getActiveScene()->systems.push_back(new _System { args... }); };
     };
 }
 
