@@ -1,9 +1,11 @@
 #ifndef __ONIP_COMPONENTS_GRAPHICS_COMPS_HPP__
 #define __ONIP_COMPONENTS_GRAPHICS_COMPS_HPP__
 
+#include "onip/graphics/gl_pipeline.hpp"
+
 #include <glm/glm.hpp>
 #include <vector>
-#include <array>
+
 
 namespace onip {
     struct Transform {
@@ -21,17 +23,21 @@ namespace onip {
         ~SpriteRenderer() = default;
         static constexpr uint32_t getId() { return 1; }
 
-        std::array<uint32_t, 4> vertices;
+        bool flip_x { false };
+        bool flip_y { false };
+        std::vector<GlPipeline::Vertex> vertices { {}, {}, {}, {} };
+        glm::vec4 overlay_color { glm::vec4(0.0f, 0.0f, 0.0f, 0.0f) };
+        GlPipeline::Texture* sprite_sheet { nullptr };
+        GlPipeline::Material* material { nullptr };
     };
 
     struct MeshRenderer {
         MeshRenderer() = default;
-        ~MeshRenderer() {
-            delete vertices;
-        }
+        ~MeshRenderer() = default;
         static constexpr uint32_t getId() { return 2; }
 
-        std::vector<uint32_t>* vertices { new std::vector<uint32_t>() };
+        std::vector<GlPipeline::Vertex> vertices {};
+        GlPipeline::Material* material { nullptr };
     };
 
     struct Camera {

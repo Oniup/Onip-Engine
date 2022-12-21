@@ -19,13 +19,17 @@ namespace onip {
 
         glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &m_max_texture_units);
 
-        implCreateShader(
+        Shader* default_shader = implCreateShader(
             "Default Sprite", "engine/assets/shaders/default_sprite.frag", "engine/assets/shaders/default_sprite.vert"
         );
 
-        implCreateTexture(
+        Texture* missing_texture = implCreateTexture(
             "Missing Texture", "engine/assets/textures/missing_texture.png", TextureConfig_Default
         );
+
+        implCreateMaterial("Sprite Default", default_shader);
+        Material* missing_texture_material = implCreateMaterial("Missing Texture", default_shader);
+        missing_texture_material->diffuse_textures.push_back(missing_texture);
     }
 
     GlPipeline::~GlPipeline() {
@@ -59,8 +63,8 @@ namespace onip {
         glDeleteTextures(1, &id);
     }
 
-    GlPipeline::Shader* GlPipeline::implCreateShader(std::string name, std::string fragment_path, std::string vertex_path) {
-        const char* paths[2] = { fragment_path.c_str(), vertex_path.c_str() };
+    GlPipeline::Shader* GlPipeline::implCreateShader(std::string_view name, std::string_view fragment_path, std::string_view vertex_path) {
+        const char* paths[2] = { fragment_path.data(), vertex_path.data() };
         uint32_t shaders[2] = { 0, 0 };
         uint32_t shader_program = glCreateProgram();
 
@@ -111,7 +115,7 @@ namespace onip {
         glDeleteShader(shaders[1]);
 
         m_shaders.push_back(new Shader{
-            name, shader_program
+            name.data(), shader_program
         });
         Shader* shader = m_shaders.back();
 #ifndef NDEBUG
@@ -121,12 +125,12 @@ namespace onip {
         return shader;
     }
 
-    GlPipeline::Texture* GlPipeline::implCreateTexture(std::string name, std::string path, TextureConfig config) {
+    GlPipeline::Texture* GlPipeline::implCreateTexture(std::string_view name, std::string_view path, TextureConfig config) {
         stbi_set_flip_vertically_on_load(config & TextureConfig_FlipVertically);
 
         int width, height, channels;
-        uint8_t* buffer = stbi_load(path.c_str(), &width, &height, &channels, 0);
-        ONIP_ASSERT_FMT(buffer, "Failed to create shader, couldn't find [%s]\n", path.c_str());
+        uint8_t* buffer = stbi_load(path.data(), &width, &height, &channels, 0);
+        ONIP_ASSERT_FMT(buffer, "Failed to create shader, couldn't find [%s]\n", path.data());
 
         uint32_t texture_id;
         glGenTextures(1, &texture_id);
@@ -175,7 +179,7 @@ namespace onip {
         }
 
         m_textures.push_back(new Texture {
-            name, texture_id, width, height, channels, config
+            name.data(), texture_id, width, height, channels, config
         });
 #ifndef NDEBUG
         Texture* result = m_textures.back();
@@ -184,18 +188,30 @@ namespace onip {
         return m_textures.back();
     }
 
+    GlPipeline::Material* GlPipeline::implCreateMaterial(std::string_view name, const Shader* shader) {
+#ifndef NDEBUG
+        for (Material* material : m_materials) {
+            if (material->name == name) {
+                std::cout << "cannot create material because it already exists\n";
+                return nullptr;
+            }
+        }
+        if (shader == nullptr) {
+            std::cout << "cannot create material as the shader passed is null\n";
+            return nullptr;
+        }
+#endif // NDEBUG
+
+        m_materials.push_back(new Material {});
+        Material* material = m_materials.back();
+        material->name = name.data();
+        material->shader = shader;
+        return material;
+    }
+
     GlPipeline::Renderer* GlPipeline::implCreateRenderer(Renderer*&& renderer) {
         m_renderers.push_back(std::move(renderer));
         return m_renderers.back();
-    }
-
-    GlPipeline::Renderer* GlPipeline::implGetRenderer(std::string_view name) {
-        for (Renderer* renderer : m_renderers) {
-            if (renderer->getName() == name) {
-                return renderer;
-            }
-        }
-        return nullptr;
     }
 
     GlPipeline::Shader* GlPipeline::implGetShader(std::string_view name) {
@@ -211,6 +227,24 @@ namespace onip {
         for (Texture* texture : m_textures) {
             if (texture->name == name) {
                 return texture;
+            }
+        }
+        return nullptr;
+    }
+
+    GlPipeline::Material* GlPipeline::implGetMaterial(std::string_view name) {
+        for (Material* material : m_materials) {
+            if (material->name == name) {
+                return material;
+            }
+        }
+        return nullptr;
+    }
+
+    GlPipeline::Renderer* GlPipeline::implGetRenderer(std::string_view name) {
+        for (Renderer* renderer : m_renderers) {
+            if (renderer->getName() == name) {
+                return renderer;
             }
         }
         return nullptr;

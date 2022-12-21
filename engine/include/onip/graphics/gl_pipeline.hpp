@@ -9,6 +9,7 @@
 
 #include <array>
 #include <string>
+#include <string_view>
 #include <vector>
 
 #include <glm/glm.hpp>
@@ -47,16 +48,19 @@ namespace onip {
         };
 
         struct Shader {
+            Shader() = default;
             ~Shader();
 
             std::string name {};
             uint32_t id {};
+
 #if ONIP_GRAPHICS_TYPES_STORE_PATH
             std::string path[2] { {}, {} };
 #endif // ONIP_GRAPHICS_TYPES_STORE_PATH
         };
 
         struct Texture {
+            Texture() = default;
             ~Texture();
 
             std::string name {};
@@ -65,18 +69,24 @@ namespace onip {
             int height { 0 };
             int channels { 0 };
             TextureConfig config { TextureConfig_Default };
+
 #if ONIP_GRAPHICS_TYPES_STORE_PATH
             std::string path { };
 #endif // ONIP_GRAPHICS_TYPES_STORE_PATH
         };
 
         struct Material {
+            Material() = default;
             ~Material() = default;
 
             std::string name {};
             UUID uuid { Utils::randUint64() };
             const Shader* shader { nullptr };
-            std::vector<uint32_t> textureIds {};
+            std::vector<Texture*> diffuse_textures {};
+            std::vector<Texture*> specular_textures {};
+            std::vector<Texture*> ambient_textures {};
+            glm::vec4 color_overlay { glm::vec4(0.0f, 0.0f, 0.0f, 0.0f) };
+
 #if ONIP_GRAPHICS_TYPES_STORE_PATH
             std::string path {};
 #endif // ONIP_GRAPHICS_TYPES_STORE_PATH
@@ -88,21 +98,25 @@ namespace onip {
         ONIP_INLINE static Window* getWindow() { return &Application::getGraphicsPipeline()->m_window; }
         ONIP_INLINE static Shader* getShader(std::string_view name) { return Application::getGraphicsPipeline()->implGetShader(name); }
         ONIP_INLINE static Texture* getTexture(std::string_view name) { return Application::getGraphicsPipeline()->implGetTexture(name); }
+        ONIP_INLINE static Material* getMaterial(std::string_view name) { return Application::getGraphicsPipeline()->implGetMaterial(name); }
         ONIP_INLINE static Renderer* getRenderer(std::string_view name) { return Application::getGraphicsPipeline()->implGetRenderer(name); }
 
-        ONIP_INLINE static Shader* createShader(std::string name, std::string fragment_path, std::string vertex_path) { return Application::getGraphicsPipeline()->implCreateShader(name, fragment_path, vertex_path); }
-        ONIP_INLINE static Texture* createTexture(std::string name, std::string path, TextureConfig config = TextureConfig_Default) { return Application::getGraphicsPipeline()->implCreateTexture(name, path, config); }
+        ONIP_INLINE static Shader* createShader(std::string_view name, std::string_view fragment_path, std::string_view vertex_path) { return Application::getGraphicsPipeline()->implCreateShader(name, fragment_path, vertex_path); }
+        ONIP_INLINE static Texture* createTexture(std::string_view name, std::string_view path, TextureConfig config = TextureConfig_Default) { return Application::getGraphicsPipeline()->implCreateTexture(name, path, config); }
+        ONIP_INLINE static Material* createMaterial(std::string_view name, const Shader* shader) { return Application::getGraphicsPipeline()->implCreateMaterial(name, shader); }
         ONIP_INLINE static Renderer* createRenderer(Renderer*&& renderer) { return Application::getGraphicsPipeline()->implCreateRenderer(std::move(renderer)); }
 
         void onUpdate() override;
     private:
-        Shader* implCreateShader(std::string name, std::string fragment_path, std::string vertex_path);
-        Texture* implCreateTexture(std::string name, std::string path, TextureConfig config);
+        Shader* implCreateShader(std::string_view name, std::string_view fragment_path, std::string_view vertex_path);
+        Texture* implCreateTexture(std::string_view name, std::string_view path, TextureConfig config);
+        Material* implCreateMaterial(std::string_view name, const Shader* shader);
         Renderer* implCreateRenderer(Renderer*&& renderer);
         
-        Renderer* implGetRenderer(std::string_view name);
         Shader* implGetShader(std::string_view name);
         Texture* implGetTexture(std::string_view name);
+        Material* implGetMaterial(std::string_view name);
+        Renderer* implGetRenderer(std::string_view name);
 
         Window m_window {};
         int m_max_texture_units {};

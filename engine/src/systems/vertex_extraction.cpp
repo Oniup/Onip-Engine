@@ -5,11 +5,12 @@
 #include "onip/utils/pool.hpp"
 
 namespace onip {
-    GraphicsVerticesHandler::GraphicsVerticesHandler() {
+    GraphicsVertexExtractionSystem::GraphicsVertexExtractionSystem() {
         m_batch_renderer = static_cast<GlBatchRenderer*>(GlPipeline::getRenderer("Batch Renderer"));
+        // TODO: add instance rendering here ...
     }
 
-    void GraphicsVerticesHandler::onUpdate() {
+    void GraphicsVertexExtractionSystem::onUpdate() {
         if (m_target_pool == nullptr) {
             m_target_pool = Ecs::getPoolWhichContains<Transform, SpriteRenderer, MeshRenderer>();
         }
@@ -21,6 +22,19 @@ namespace onip {
                 }
                     
                 ComponentMeta* meta = static_cast<ComponentMeta*>(ptr);
+                if (Transform::getId() == meta->comp_id) {
+                    m_batch_renderer->pushTransform(meta->entity->uuid, Ecs::getComponentFromMeta<Transform>(meta));
+                }
+                else if (MeshRenderer::getId() == meta->comp_id) {
+                    MeshRenderer* mesh_renderer = Ecs::getComponentFromMeta<MeshRenderer>(meta);
+                    m_batch_renderer->pushVertices(meta->entity->uuid, mesh_renderer->vertices);
+                    m_batch_renderer->pushMaterial(meta->entity->uuid, mesh_renderer->material);
+                }
+                else if (SpriteRenderer::getId() == meta->comp_id) {
+                    SpriteRenderer* sprite_renderer = Ecs::getComponentFromMeta<SpriteRenderer>(meta);
+                    m_batch_renderer->pushVertices(meta->entity->uuid, sprite_renderer->vertices);
+                    m_batch_renderer->pushMaterial(meta->entity->uuid, sprite_renderer->material);
+                }
             }
         }
     }

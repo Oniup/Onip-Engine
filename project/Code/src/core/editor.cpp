@@ -4,6 +4,7 @@
 #include <onip/core/scene_manager.hpp>
 #include <onip/utils/pool.hpp>
 #include <onip/components/graphics_comps.hpp>
+#include <onip/graphics/gl_pipeline.hpp>
 #include <onip/systems/vertex_extraction.hpp>
 #include <glm/glm.hpp>
 
@@ -28,16 +29,19 @@ Editor::~Editor() {
 
 void Editor::initializeRequirements() {
     GlPipeline::createRenderer(new GlBatchRenderer());
+    
     SceneManager::loadEmpty();
 
-    Ecs::addCustomSystem<GraphicsVerticesHandler>();
+    Ecs::addCustomSystem<GraphicsVertexExtractionSystem>();
 
     Ecs::createComponentGroup<Camera, Transform, SpriteRenderer, MeshRenderer>();
     entity = Ecs::createEntity("Player");
-    Ecs::addComponent<SpriteRenderer>(entity);
-    Ecs::addComponent<Camera>(entity);
+    SpriteRenderer* sprite_renderer = Ecs::addComponent<SpriteRenderer>(entity);
+    sprite_renderer->material = GlPipeline::getMaterial("Sprite Default");
+    sprite_renderer->sprite_sheet = GlPipeline::createTexture("Box Test", "engine/assets/textures/test_crate.png");
 
-    Transform* transform = Ecs::getComponent<Transform>(entity);
+    entity = Ecs::createEntity("Main Camera");
+    Ecs::addComponent<Camera>(entity);
 
     Ecs::debugPrintComponentGroups();
 }

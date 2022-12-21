@@ -273,7 +273,11 @@ namespace onip {
                 for (size_t j = 0; j < ids_size; j++) {
                     if (i != j) {
                         if (ids[i] == ids[j]) {
-                            std::cout << "cannot create component group as there is two ids that are the same\n";
+                            std::cout << "cannot create component group as there is two ids that are the same: [ ";
+                            for (size_t i = 0; i < ids_size; i++) {
+                                std::cout << ids[i] << " ";
+                            }
+                            std::cout << "]\n";
                             return false;
                         }
                     }

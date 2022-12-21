@@ -10,10 +10,10 @@
 #include <tuple>
 
 namespace onip {
-    class GraphicsVerticesHandler : public CustomSystem {
+    class GraphicsVertexExtractionSystem : public CustomSystem {
     public:
-        GraphicsVerticesHandler();
-        ~GraphicsVerticesHandler() = default;
+        GraphicsVertexExtractionSystem();
+        ~GraphicsVertexExtractionSystem() = default;
 
         ONIP_INLINE const char* getName() override { return "Vertex Extraction"; };
         void onUpdate() override;

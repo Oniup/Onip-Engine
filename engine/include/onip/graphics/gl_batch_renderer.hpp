@@ -31,6 +31,7 @@ namespace onip {
         struct BatchReserve {
             UUID entity_id { 0 };
             const Transform* transform { nullptr };
+            const GlPipeline::Material* material_override { nullptr };
             const GlPipeline::Material* material { nullptr };
             const std::vector<GlPipeline::Vertex>* vertices {};
         };
@@ -43,9 +44,9 @@ namespace onip {
         GlBatchRenderer();
         ~GlBatchRenderer();
 
-        VertexRange pushVertices(const std::vector<GlPipeline::Vertex>& vertices, const GlPipeline::Material* material, const Transform* transform);
+        VertexRange pushVertices(const std::vector<GlPipeline::Vertex>& vertices, const GlPipeline::Material* material, const Transform* transform, const GlPipeline::Material* material_override = nullptr);
         void pushVertices(UUID entity_id, const std::vector<GlPipeline::Vertex>& vertices);
-        void pushMaterial(UUID entity_id, const GlPipeline::Material* material);
+        void pushMaterial(UUID entity_id, const GlPipeline::Material* material, const GlPipeline::Material* material_override = nullptr);
         void pushTransform(UUID entity_id, const Transform* transform);
 
         void onDraw() override;

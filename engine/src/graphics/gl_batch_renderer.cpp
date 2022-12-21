@@ -1,5 +1,6 @@
 #include "onip/graphics/gl_batch_renderer.hpp"
 
+#include <iostream>
 #include <glad/glad.h>
 
 namespace onip {
@@ -13,7 +14,7 @@ namespace onip {
         }
     }
 
-    GlBatchRenderer::VertexRange GlBatchRenderer::pushVertices(const std::vector<GlPipeline::Vertex>& vertices, const GlPipeline::Material* material, const Transform* transform) {
+    GlBatchRenderer::VertexRange GlBatchRenderer::pushVertices(const std::vector<GlPipeline::Vertex>& vertices, const GlPipeline::Material* material, const Transform* transform, const GlPipeline::Material* material_override) {
         Batch* batch = nullptr;
         for (size_t i = 0; i < m_batches.size(); i++) {
             if (m_batches[i]->shader == material->shader) {
@@ -71,10 +72,11 @@ namespace onip {
         checkIfReserveCanPush(reserve, index);
     }
 
-    void GlBatchRenderer::pushMaterial(UUID entity_id, const GlPipeline::Material* material) {
+    void GlBatchRenderer::pushMaterial(UUID entity_id, const GlPipeline::Material* material, const GlPipeline::Material* material_override) {
         uint32_t index = 0;
         BatchReserve* reserve = getReserve(entity_id, &index);
         reserve->material = material;
+        reserve->material_override = material_override;
         checkIfReserveCanPush(reserve, index);
     }
 
@@ -86,6 +88,11 @@ namespace onip {
     }
 
     void GlBatchRenderer::onDraw() {
+        for (Batch* batch : m_batches) {
+            delete batch;
+        }
+        m_batches.clear();
+        m_reserves.clear();
     }
 
     void GlBatchRenderer::initializeVertexBuffers() {
@@ -117,7 +124,7 @@ namespace onip {
         if (reserve->transform != nullptr) {
             if (reserve->material != nullptr) {
                 if (reserve->vertices != nullptr) {
-                    pushVertices(*reserve->vertices, reserve->material, reserve->transform);
+                    pushVertices(*reserve->vertices, reserve->material, reserve->transform, reserve->material_override);
                     m_reserves.erase(m_reserves.begin() + index);
                 }
             }
