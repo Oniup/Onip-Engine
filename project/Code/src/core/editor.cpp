@@ -38,7 +38,12 @@ void Editor::initializeRequirements() {
     entity = Ecs::createEntity("Player");
     SpriteRenderer* sprite_renderer = Ecs::addComponent<SpriteRenderer>(entity);
     sprite_renderer->material = GlPipeline::getMaterial("Sprite Default");
-    sprite_renderer->sprite_sheet = GlPipeline::createTexture("Box Test", "engine/assets/textures/test_crate.png");
+    sprite_renderer->sprite = GlPipeline::createTexture("Box Test", "engine/assets/textures/test_crate.png");
+
+    sprite_renderer->vertices.push_back({ glm::vec3(0.5f, 0.5f, 0.0f), glm::vec2(1.0f, 1.0f), glm::vec3(1.0f, 1.0f, -1.0f) });
+    sprite_renderer->vertices.push_back({ glm::vec3(0.5f, -0.5f, 0.0f), glm::vec2(1.0f, 0.0f), glm::vec3(1.0f, 1.0f, -1.0f) });
+    sprite_renderer->vertices.push_back({ glm::vec3(-0.5f, -0.5f, 0.0f), glm::vec2(0.0f, 0.0f), glm::vec3(1.0f, 1.0f, -1.0f) });
+    sprite_renderer->vertices.push_back({ glm::vec3(-0.5f, 0.5f, 0.0f), glm::vec2(0.0f, 1.0f), glm::vec3(1.0f, 1.0f, -1.0f) });
 
     entity = Ecs::createEntity("Main Camera");
     Ecs::addComponent<Camera>(entity);

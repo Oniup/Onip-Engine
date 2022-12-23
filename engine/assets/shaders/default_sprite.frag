@@ -1,15 +1,7 @@
-#version 450 core 
+#version 450 core
 
-struct Material {
-    vec3 normal;
-    vec2 uv;
-    float textureId;
-};
-
-out vec4 fragColor;
-
-// in Material o_Material;
+out vec4 frag_color;
 
 void main() {
-    fragColor = vec4(1.0, 0.7, 0.3, 1.0);
+    frag_color = vec4(0.25, 0.54, 0.68, 1.0);
 }

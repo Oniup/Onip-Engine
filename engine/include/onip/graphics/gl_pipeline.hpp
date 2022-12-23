@@ -29,7 +29,7 @@ namespace onip {
 
         struct Vertex {
             glm::vec3 position;
-            glm::vec3 uv;
+            glm::vec2 uv;
             glm::vec3 normals;
         };
 
@@ -85,6 +85,7 @@ namespace onip {
             std::vector<Texture*> diffuse_textures {};
             std::vector<Texture*> specular_textures {};
             std::vector<Texture*> ambient_textures {};
+            float specular_shininess {};
             glm::vec4 color_overlay { glm::vec4(0.0f, 0.0f, 0.0f, 0.0f) };
 
 #if ONIP_GRAPHICS_TYPES_STORE_PATH
@@ -100,6 +101,7 @@ namespace onip {
         ONIP_INLINE static Texture* getTexture(std::string_view name) { return Application::getGraphicsPipeline()->implGetTexture(name); }
         ONIP_INLINE static Material* getMaterial(std::string_view name) { return Application::getGraphicsPipeline()->implGetMaterial(name); }
         ONIP_INLINE static Renderer* getRenderer(std::string_view name) { return Application::getGraphicsPipeline()->implGetRenderer(name); }
+        ONIP_INLINE static int getMaxTextureUnitsPerFrag() { return Application::getGraphicsPipeline()->m_max_texture_units; }
 
         ONIP_INLINE static Shader* createShader(std::string_view name, std::string_view fragment_path, std::string_view vertex_path) { return Application::getGraphicsPipeline()->implCreateShader(name, fragment_path, vertex_path); }
         ONIP_INLINE static Texture* createTexture(std::string_view name, std::string_view path, TextureConfig config = TextureConfig_Default) { return Application::getGraphicsPipeline()->implCreateTexture(name, path, config); }

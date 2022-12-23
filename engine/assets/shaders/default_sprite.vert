@@ -1,20 +1,20 @@
 #version 450 core
 
-#define SOUND_OFFSET 32
+#define MAX_MODEL_MATRICES_SIZE 500
 
-struct Material {
-    vec3 normal;
-    vec2 uv;
-    float textureId;
-};
+layout (location = 0) in vec3 a_position;
+layout (location = 1) in vec2 a_uv;
+layout (location = 2) in vec3 a_normals;
+layout (location = 3) in float a_transform_id;
+layout (location = 4) in vec2 a_diffuse_texture_range;
+layout (location = 5) in vec2 a_specular_texture_range;
+layout (location = 6) in vec2 a_ambient_texture_range;
+layout (location = 7) in float a_specular_shininess;
 
-layout (location = 0) in vec3 a_Position;
-layout (location = 1) in vec3 a_Normal;
-layout (location = 2) in vec2 a_Uv;
-layout (location = 3) in float a_TextureId;
-
-// out Material o_Material;
+uniform mat4 model_matrices[MAX_MODEL_MATRICES_SIZE];
+uniform mat4 projection_matrix;
+uniform mat4 view_matrix;
 
 void main() {
-    gl_Position = vec4(a_Position.xyz, 1.0);
+    gl_Position = vec4(a_position.xyz, 1.0);
 }

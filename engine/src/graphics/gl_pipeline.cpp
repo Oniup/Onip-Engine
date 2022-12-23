@@ -94,7 +94,8 @@ namespace onip {
                 glGetShaderiv(shaders[i], GL_INFO_LOG_LENGTH, &result);
                 char* error_message = (char*)malloc(sizeof(char*) * result);
                 glGetShaderInfoLog(shaders[i], result, &result, error_message);
-                ONIP_ASSERT_FMT(false, "Failed to compile shader at [%s]\nOpenGL Error:\n%s", paths[i], error_message);
+                error_message[result] = '\0';
+                ONIP_ASSERT_FMT(false, "Failed to compile shader at [%s]\nOpenGL %s", paths[i], error_message);
             }
 
             glAttachShader(shader_program, shaders[i]);
@@ -108,8 +109,9 @@ namespace onip {
         if (!result) {
             glGetProgramiv(shader_program, GL_INFO_LOG_LENGTH, &result);
             char* error_message = (char*)malloc(sizeof(char*) * result);
-            glGetShaderInfoLog(shader_program, result, &result, error_message);
-            ONIP_ASSERT_FMT(false, "Failed to Link Shaders to Program:\n\t- %s\n\t- %s\n", paths[0], paths[1]);
+            glGetProgramInfoLog(shader_program, result, &result, error_message);
+            error_message[result] = '\0';
+            ONIP_ASSERT_FMT(false, "Failed to Link Shaders to Program:\n\t- %s\n\t- %s\nOpenGL %s", paths[0], paths[1], error_message);
         }
         glDeleteShader(shaders[0]);
         glDeleteShader(shaders[1]);

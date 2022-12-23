@@ -27,7 +27,9 @@ namespace onip {
         bool flip_y { false };
         std::vector<GlPipeline::Vertex> vertices { {}, {}, {}, {} };
         glm::vec4 overlay_color { glm::vec4(0.0f, 0.0f, 0.0f, 0.0f) };
-        GlPipeline::Texture* sprite_sheet { nullptr };
+        GlPipeline::Texture* sprite { nullptr };
+        GlPipeline::Texture* sprite_specular { nullptr };
+        GlPipeline::Texture* sprite_ambient { nullptr };
         GlPipeline::Material* material { nullptr };
     };
 

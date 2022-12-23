@@ -22,18 +22,18 @@ namespace onip {
                 }
                     
                 ComponentMeta* meta = static_cast<ComponentMeta*>(ptr);
-                if (Transform::getId() == meta->comp_id) {
+                if (Ecs::checkIfSameComponentType<Transform>(meta)) {
                     m_batch_renderer->pushTransform(meta->entity->uuid, Ecs::getComponentFromMeta<Transform>(meta));
                 }
-                else if (MeshRenderer::getId() == meta->comp_id) {
+                else if (Ecs::checkIfSameComponentType<MeshRenderer>(meta)) {
                     MeshRenderer* mesh_renderer = Ecs::getComponentFromMeta<MeshRenderer>(meta);
                     m_batch_renderer->pushVertices(meta->entity->uuid, mesh_renderer->vertices);
                     m_batch_renderer->pushMaterial(meta->entity->uuid, mesh_renderer->material);
                 }
-                else if (SpriteRenderer::getId() == meta->comp_id) {
+                else if (Ecs::checkIfSameComponentType<SpriteRenderer>(meta)) {
                     SpriteRenderer* sprite_renderer = Ecs::getComponentFromMeta<SpriteRenderer>(meta);
                     m_batch_renderer->pushVertices(meta->entity->uuid, sprite_renderer->vertices);
-                    m_batch_renderer->pushMaterial(meta->entity->uuid, sprite_renderer->material);
+                    m_batch_renderer->pushMaterial(meta->entity->uuid, sprite_renderer->material, sprite_renderer->sprite);
                 }
             }
         }

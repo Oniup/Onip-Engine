@@ -193,6 +193,11 @@ namespace onip {
         }
 
         template <typename _Component>
+        bool checkIfSameType(ComponentMeta* meta) {
+            return _Component::getId() == meta->comp_id;
+        }
+
+        template <typename _Component>
         void destroyComponent(_Component* component) {
             ComponentMeta* meta = getMetaFromComp(component);
             Pool* target_pool = getPoolWhichContains<_Component>();
