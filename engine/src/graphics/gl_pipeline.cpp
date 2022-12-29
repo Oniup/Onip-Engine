@@ -212,7 +212,7 @@ namespace onip {
     }
 
     GlPipeline::Renderer* GlPipeline::implCreateRenderer(Renderer*&& renderer) {
-        m_renderers.push_back(std::move(renderer));
+        m_renderers.emplace_back(std::move(renderer));
         return m_renderers.back();
     }
 

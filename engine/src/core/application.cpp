@@ -16,10 +16,11 @@ namespace onip {
         initializeRequirements();
         while (!GlPipeline::getWindow()->isClosing()) {
             Input::pollEvents();
+            GlPipeline::getWindow()->clearScreen();
             for (ApplicationLayer* layer : m_layers) {
                 layer->onUpdate();
             }
-            GlPipeline::getWindow()->clearScreen();
+            GlPipeline::getWindow()->swapBuffers();
         }
         destroyLayers();
     }

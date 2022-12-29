@@ -201,11 +201,11 @@ namespace onip {
         }
     }
     
-    bool Window::isClosing() {
+    bool Window::isClosing() const {
         return glfwWindowShouldClose(m_internal);
     }
     
-    void Window::clearScreen() const {
+    void Window::clearScreen() {
         if (!(m_config & Config_DisableClearingScreen)) {
             glClearColor(m_clear_color[0], m_clear_color[1], m_clear_color[2], m_clear_color[3]);
             if (m_config & Config_EnableDepthTesting) {
@@ -215,12 +215,14 @@ namespace onip {
                 glClear(GL_COLOR_BUFFER_BIT);
             }
         }
-        glfwSwapBuffers(m_internal);
         if (m_config & Config_UpdateViewportPerFrame) {
-            int width, height;
-            glfwGetFramebufferSize(m_internal, &width, &height);
-            glViewport(m_viewport_offset[0], m_viewport_offset[1], width, height);
+            glfwGetFramebufferSize(m_internal, &m_size.x, &m_size.y);
+            glViewport(m_viewport_offset[0], m_viewport_offset[1], m_size.x, m_size.y);
         }
+    }
+
+    void Window::swapBuffers() {
+        glfwSwapBuffers(m_internal);
     }
     
     void Window::initInstance() {
@@ -279,8 +281,6 @@ namespace onip {
         }
         glfwSwapInterval(m_config & Config_DisableVsync ? 0 : 1);
     
-        int width, height;
-        glfwGetFramebufferSize(m_internal, &width, &height);
-        glViewport(m_viewport_offset[0], m_viewport_offset[1], width, height);
+        glViewport(m_viewport_offset[0], m_viewport_offset[1], m_size.x, m_size.y);
     }
 }

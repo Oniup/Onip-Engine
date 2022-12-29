@@ -33,6 +33,11 @@ namespace onip {
             glm::vec3 normals;
         };
 
+        struct VertexData {
+            std::vector<Vertex> vertices;
+            std::vector<uint32_t> indices;
+        };
+
         enum TextureConfig {
             TextureConfig_Default                       = 0x000,
             TextureConfig_FlipVertically                = 0x001,
@@ -101,7 +106,7 @@ namespace onip {
         ONIP_INLINE static Texture* getTexture(std::string_view name) { return Application::getGraphicsPipeline()->implGetTexture(name); }
         ONIP_INLINE static Material* getMaterial(std::string_view name) { return Application::getGraphicsPipeline()->implGetMaterial(name); }
         ONIP_INLINE static Renderer* getRenderer(std::string_view name) { return Application::getGraphicsPipeline()->implGetRenderer(name); }
-        ONIP_INLINE static int getMaxTextureUnitsPerFrag() { return Application::getGraphicsPipeline()->m_max_texture_units; }
+        ONIP_INLINE static size_t getMaxTextureUnitsPerFrag() { return static_cast<size_t>(Application::getGraphicsPipeline()->m_max_texture_units); }
 
         ONIP_INLINE static Shader* createShader(std::string_view name, std::string_view fragment_path, std::string_view vertex_path) { return Application::getGraphicsPipeline()->implCreateShader(name, fragment_path, vertex_path); }
         ONIP_INLINE static Texture* createTexture(std::string_view name, std::string_view path, TextureConfig config = TextureConfig_Default) { return Application::getGraphicsPipeline()->implCreateTexture(name, path, config); }

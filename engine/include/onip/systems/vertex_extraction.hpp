@@ -12,7 +12,7 @@
 namespace onip {
     class GraphicsVertexExtractionSystem : public CustomSystem {
     public:
-        GraphicsVertexExtractionSystem();
+        GraphicsVertexExtractionSystem(GlBatchRenderer* renderer = nullptr);
         ~GraphicsVertexExtractionSystem() = default;
 
         ONIP_INLINE const char* getName() override { return "Vertex Extraction"; };

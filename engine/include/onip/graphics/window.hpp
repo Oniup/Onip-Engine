@@ -66,8 +66,9 @@ namespace onip {
     
         void setConfig(Config config);
         void getResolutionInPixels(Resolution resolution, int* width, int* height) const;
-        bool isClosing();
-        void clearScreen() const;
+        bool isClosing() const;
+        void clearScreen();
+        void swapBuffers();
     private:
         void initInstance();
     

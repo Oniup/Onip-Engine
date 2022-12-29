@@ -25,12 +25,21 @@ namespace onip {
 
         bool flip_x { false };
         bool flip_y { false };
-        std::vector<GlPipeline::Vertex> vertices { {}, {}, {}, {} };
         glm::vec4 overlay_color { glm::vec4(0.0f, 0.0f, 0.0f, 0.0f) };
+
+        GlPipeline::Material* material { nullptr };
         GlPipeline::Texture* sprite { nullptr };
         GlPipeline::Texture* sprite_specular { nullptr };
         GlPipeline::Texture* sprite_ambient { nullptr };
-        GlPipeline::Material* material { nullptr };
+
+        GlPipeline::VertexData vertex_data { {
+                { glm::vec3(1.0f, 1.0f, 1.0f),      glm::vec2(1.0f, 1.0f),      glm::vec3(0.0f, 0.0f, 1.0f) },
+                { glm::vec3(1.0f, -1.0f, 1.0f),     glm::vec2(1.0f, 0.0f),      glm::vec3(0.0f, 0.0f, 1.0f) },
+                { glm::vec3(-1.0f, -1.0f, 1.0f),    glm::vec2(0.0f, 0.0f),      glm::vec3(0.0f, 0.0f, 1.0f) },
+                { glm::vec3(-1.0f, 1.0f, 1.0f),     glm::vec2(0.0f, 1.0f),      glm::vec3(0.0f, 0.0f, 1.0f) },
+            },
+            { 0, 1, 2,      0, 2, 3 }
+        };
     };
 
     struct MeshRenderer {
@@ -38,7 +47,7 @@ namespace onip {
         ~MeshRenderer() = default;
         static constexpr uint32_t getId() { return 2; }
 
-        std::vector<GlPipeline::Vertex> vertices {};
+        GlPipeline::VertexData vertex_data { {}, {} };
         GlPipeline::Material* material { nullptr };
     };
 
