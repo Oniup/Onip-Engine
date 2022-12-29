@@ -20,26 +20,34 @@ namespace onip {
 
             glUniform4fv(
                 glGetUniformLocation(batch.shader->id, "u_overlay_colors"), 
-                1, &batch.overlay_colors[0][0]
+                static_cast<int>(batch.overlay_colors.size()), &batch.overlay_colors[0][0]
+            );
+            
+            glUniformMatrix4fv(
+                glGetUniformLocation(batch.shader->id, "u_model_matrices"),
+                static_cast<int>(batch.model_matrices.size()), false, &batch.model_matrices[0][0][0]
             );
 
-            std::vector<float> vertices {
-                 0.5f,  0.5f, 0.0f,  0, // top right
-                 0.5f, -0.5f, 0.0f,  0, // bottom right
-                -0.5f, -0.5f, 0.0f,  0, // bottom left
-                -0.5f,  0.5f, 0.0f,  0, // top left 
-            };
-            std::vector<uint32_t> indices {
-                0, 1, 3,   // first triangle
-                1, 2, 3    // second triangle
-            };
+            static bool first = true;
+            if (first) {
+                std::cout << "vertices:\n";
+                for (size_t i = 0; i < batch.vertices.size(); i += ONIP_RAW_VERTEX_SIZE) {
+                    std::cout << "pos: " << batch.vertices[i] << ", " << batch.vertices[i + 1] << ", " << batch.vertices[i + 2];
+                    std::cout << ", overlay_color_index: " << batch.vertices[i + 3] << ", " << "transform_index: " << ", " << batch.vertices[i + 4] << "\n";
+                }
+                std::cout << "indices:\n";
+                for (uint32_t& index : batch.indices) {
+                    std::cout << index << " ";
+                }
+                first = false;
+            }
 
             glBindBuffer(GL_ARRAY_BUFFER, m_vertex_buffer);
-            glBufferData(GL_ARRAY_BUFFER, sizeof(float) * vertices.size(), &vertices[0], GL_STATIC_DRAW);
+            glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(float) * batch.vertices.size(), &batch.vertices[0]);
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_element_buffer);
-            glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint32_t) * indices.size(), &indices[0], GL_STATIC_DRAW);
+            glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, sizeof(uint32_t) * batch.indices.size(), &batch.indices[0]);
 
-            glDrawElements(GL_TRIANGLES, static_cast<int>(indices.size()), GL_UNSIGNED_INT, (void*)0);
+            glDrawElements(GL_TRIANGLES, static_cast<int>(batch.indices.size()), GL_UNSIGNED_INT, (void*)0);
         }
         glUseProgram(0);
         glBindVertexArray(0);
@@ -79,15 +87,15 @@ namespace onip {
 
             glGenBuffers(1, &m_vertex_buffer);
             glBindBuffer(GL_ARRAY_BUFFER, m_vertex_buffer);
-            glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * ONIP_MAX_VERTEX_BUFFER_SIZE, nullptr, GL_DYNAMIC_DRAW);
+            glBufferData(GL_ARRAY_BUFFER, ONIP_RAW_VERTEX_SIZE * ONIP_MAX_VERTEX_BUFFER_SIZE, nullptr, GL_DYNAMIC_DRAW);
 
             glEnableVertexAttribArray(0);   // position
             glEnableVertexAttribArray(1);   // overlay_color_index
-            // glEnableVertexAttribArray(2);   // transform_index;
+            glEnableVertexAttribArray(2);   // transform_index;
 
-            glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 4, (void*)0);
-            glVertexAttribPointer(1, 1, GL_FLOAT, GL_FALSE, sizeof(float) * 4, (void*)(sizeof(float) * 3));
-            // glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, transform_index));
+            glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, ONIP_RAW_VERTEX_SIZE, (void*)0);
+            glVertexAttribPointer(1, 1, GL_FLOAT, GL_FALSE, ONIP_RAW_VERTEX_SIZE, (void*)(sizeof(float) * 3));
+            glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, ONIP_RAW_VERTEX_SIZE, (void*)(sizeof(float) * 4));
 
             glBindVertexArray(0);
         }
@@ -165,19 +173,19 @@ namespace onip {
 
             size_t vertices_start_position = batch->vertices.size();
             size_t indices_start_position = batch->indices.size();
-            batch->vertices.resize(batch->vertices.size() + reserve->vertex_data->vertices.size());
-            batch->indices.resize(batch->indices.size() + reserve->vertex_data->indices.size());
+            batch->vertices.resize(batch->vertices.size() + reserve->vertex_data->vertices.size() * ONIP_RAW_VERTEX_FLOAT_ELEMENT_COUNT);
+            // batch->indices.resize(batch->indices.size() + reserve->vertex_data->indices.size());
 
             size_t j = 0;
-            for (size_t i = vertices_start_position; i < batch->vertices.size(); i++) {
-                Vertex& vertex = batch->vertices[i];
+            for (size_t i = vertices_start_position; i < batch->vertices.size(); i += ONIP_RAW_VERTEX_FLOAT_ELEMENT_COUNT) {
                 const GlPipeline::Vertex& pipeline_vertex = reserve->vertex_data->vertices[j];
 
-                vertex.position[0] = pipeline_vertex.position.x;
-                vertex.position[1] = pipeline_vertex.position.y;
-                vertex.position[2] = pipeline_vertex.position.z;
-                vertex.overlay_color_index = overlay_color_index;
-                vertex.transform_index = transform_index;
+                batch->vertices[i    ] = pipeline_vertex.position.x;
+                batch->vertices[i + 1] = pipeline_vertex.position.y;
+                batch->vertices[i + 2] = pipeline_vertex.position.z;
+                batch->vertices[i + 3] = overlay_color_index;
+                batch->vertices[i + 4] = transform_index;
+
                 j++;
             }
 

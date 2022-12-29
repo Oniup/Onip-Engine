@@ -7,7 +7,6 @@
 #include "onip/graphics/gl_batch_renderer.hpp"
 
 #include <vector>
-#include <tuple>
 
 namespace onip {
     class GraphicsVertexExtractionSystem : public CustomSystem {

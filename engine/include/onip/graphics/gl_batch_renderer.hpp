@@ -4,6 +4,8 @@
 #define ONIP_MAX_UNIFORM_MODEL_MATRICES_SIZE 50
 #define ONIP_MAX_UNIFORM_OVERLAY_COLOR_SIZE  50
 #define ONIP_MAX_VERTEX_BUFFER_SIZE          4
+#define ONIP_RAW_VERTEX_FLOAT_ELEMENT_COUNT  5
+#define ONIP_RAW_VERTEX_SIZE                 sizeof(float) * ONIP_RAW_VERTEX_FLOAT_ELEMENT_COUNT
 
 #include "onip/graphics/gl_pipeline.hpp"
 #include "onip/utils/utils.hpp"
@@ -24,17 +26,11 @@ namespace onip {
         void pushVertexData(UUID entity_id, const GlPipeline::VertexData* vertices);
         void pushMaterial(UUID entity_id, const GlPipeline::Material* material, const glm::vec4* overlay_color = nullptr);
     private:
-        struct Vertex {
-            float position[3] { {}, {}, {} };
-            float overlay_color_index { -1.0f };
-            float transform_index { -1.0f };
-        };
-
         struct Batch {
             Batch() = default;
             ~Batch() = default;
 
-            std::vector<Vertex> vertices {};
+            std::vector<float> vertices {};
             std::vector<uint32_t> indices {};
             std::vector<glm::vec4> overlay_colors {};
             std::vector<glm::mat4> model_matrices {};
