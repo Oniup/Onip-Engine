@@ -14,8 +14,8 @@ layout (location = 2) in float a_transform_id;
 // layout (location = 7) in float a_specular_shininess;
 
 uniform mat4 u_model_matrices[MAX_MODEL_MATRICES_SIZE];
-// uniform mat4 u_projection_matrix;
-// uniform mat4 u_view_matrix;
+uniform mat4 u_projection_matrix;
+uniform mat4 u_view_matrix;
 uniform vec4 u_overlay_colors[MAX_OVERLAY_COLOR_SIZE];
 
 out vec4 overlay_color;

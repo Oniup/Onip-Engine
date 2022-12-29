@@ -63,6 +63,9 @@ namespace onip {
         ONIP_INLINE Config getConfig() const { return m_config; }
         ONIP_INLINE const glm::vec4& getClearColor() const { return m_clear_color; }
         ONIP_INLINE const glm::ivec2& getViewportOffset() const { return m_viewport_offset; }
+
+        ONIP_INLINE bool sizeChanged() const { return m_size_changed; }
+        ONIP_INLINE bool positionChanged() const { return m_position_changed; }
     
         void setConfig(Config config);
         void getResolutionInPixels(Resolution resolution, int* width, int* height) const;
@@ -75,6 +78,8 @@ namespace onip {
         static bool s_InitializedGlad;
     
         GLFWwindow* m_internal { nullptr };
+        bool m_size_changed = false;
+        bool m_position_changed = false;
         glm::ivec2 m_size { 0, 0 };
         glm::ivec2 m_position { 0, 0 };
         std::string m_title {};

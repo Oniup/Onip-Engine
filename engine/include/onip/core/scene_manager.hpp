@@ -8,6 +8,7 @@
 #include "onip/core/entity_manager.hpp"
 
 #include <vector>
+#include <tuple>
 #include <string>
 #include <memory>
 #include <string_view>
@@ -77,6 +78,8 @@ namespace onip {
         template <typename ... _Components>
         ONIP_INLINE static class Pool* getComponentGroupPool() { return Application::getSceneManager()->getActiveScene()->component_manager.getPool<_Components...>(); }
         ONIP_INLINE static ComponentMeta* getComponentMeta(Entity* entity, uint32_t comp_id, class Pool* target_pool = nullptr) { return Application::getSceneManager()->getActiveScene()->component_manager.getComponentMeta(entity, comp_id, target_pool); }
+        template <typename _Component>
+        ONIP_INLINE static std::vector<_Component*> getAllOfComponent() { return Application::getSceneManager()->getActiveScene()->component_manager.getAll<_Component>(); }
 
         template <typename _Component>
         ONIP_INLINE static bool checkIfSameComponentType(ComponentMeta* meta) { return Application::getSceneManager()->getActiveScene()->component_manager.checkIfSameType<_Component>(meta); }

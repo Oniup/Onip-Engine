@@ -13,6 +13,7 @@
 
 #include <glm/glm.hpp>
 #include <vector>
+#include <tuple>
 
 namespace onip {
     class GlBatchRenderer : public GlPipeline::Renderer {
@@ -25,6 +26,7 @@ namespace onip {
         void pushTransform(UUID entity_id, const Transform* transform);
         void pushVertexData(UUID entity_id, const GlPipeline::VertexData* vertices);
         void pushMaterial(UUID entity_id, const GlPipeline::Material* material, const glm::vec4* overlay_color = nullptr);
+        void pushRenderingCameras(const std::vector<Camera*>& cameras, const std::vector<Transform*>& camera_transforms);
     private:
         struct Batch {
             Batch() = default;
@@ -57,6 +59,7 @@ namespace onip {
         uint32_t m_element_buffer { 0 };
         std::vector<Batch> m_batches {};
         std::vector<Reserve> m_reserves {};
+        std::vector<std::tuple<Transform*, Camera*>> m_rendering_cameras {};
     };
 }
 

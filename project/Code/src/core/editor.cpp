@@ -6,7 +6,6 @@
 #include <onip/components/graphics_comps.hpp>
 #include <onip/graphics/gl_pipeline.hpp>
 #include <onip/systems/vertex_extraction.hpp>
-#include <onip/systems/camera_handler.hpp>
 #include <glm/glm.hpp>
 
 using namespace onip;
@@ -49,15 +48,15 @@ void Editor::initializeRequirements() {
     SceneManager::loadEmpty();
 
     Ecs::addCustomSystem<GraphicsVertexExtractionSystem>(batch_renderer);
-    Ecs::addCustomSystem<CameraHandler>();
 
-    Ecs::createComponentGroup<Camera, Transform, SpriteRenderer, MeshRenderer>();
+    Ecs::createComponentGroup<Transform, SpriteRenderer, MeshRenderer>();
+    Ecs::createComponentGroup<Camera>();
+
     entity = Ecs::createEntity("Player");
     SpriteRenderer* sprite_renderer = Ecs::addComponent<SpriteRenderer>(entity);
     sprite_renderer->overlay_color = glm::vec4(0.2f, 0.5f, 0.6f, 1.0f);
     sprite_renderer->material = GlPipeline::getMaterial("Sprite Default");
     sprite_renderer->sprite = GlPipeline::createTexture("Box Test", "engine/assets/textures/test_crate.png");
-
     Ecs::addCustomSystem<MovingSpriteTransformToLeft>(entity);
 
     entity = Ecs::createEntity("Main Camera");

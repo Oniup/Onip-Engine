@@ -193,6 +193,38 @@ namespace onip {
         }
 
         template <typename _Component>
+        std::vector<_Component*> getAll() {
+            Pool* target_pool = getPool<_Component>();
+            if (target_pool != nullptr) {
+                if (target_pool->getAllocations() > 0) {
+                    std::vector<_Component*> comps {};
+
+                    size_t count = 0;
+                    for (void* ptr : *target_pool) {
+                        if (count < target_pool->getAllocations()) {
+                            if (Pool::isNull(ptr)) {
+                                continue;
+                            }
+
+                            ComponentMeta* meta = static_cast<ComponentMeta*>(ptr);
+                            if (meta->comp_id == _Component::getId()) {
+                                comps.push_back(getCompFromMeta<_Component>(meta));
+                            }
+                            count++;
+                        }
+                        else {
+                            break;
+                        }
+                    }
+
+                    return comps;
+                }
+            }
+            
+            return {};
+        }
+
+        template <typename _Component>
         bool checkIfSameType(ComponentMeta* meta) {
             return _Component::getId() == meta->comp_id;
         }

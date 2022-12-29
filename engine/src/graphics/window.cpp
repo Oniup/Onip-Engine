@@ -216,13 +216,20 @@ namespace onip {
             }
         }
         if (m_config & Config_UpdateViewportPerFrame) {
-            glfwGetFramebufferSize(m_internal, &m_size.x, &m_size.y);
-            glViewport(m_viewport_offset[0], m_viewport_offset[1], m_size.x, m_size.y);
+            int width, height;
+            glfwGetFramebufferSize(m_internal, &width, &height);
+            if (width != m_size.x || height != m_size.y) {
+                m_size.x = width;
+                m_size.y = height;
+                glViewport(m_viewport_offset[0], m_viewport_offset[1], m_size.x, m_size.y);
+                m_size_changed = true;
+            }
         }
     }
 
     void Window::swapBuffers() {
         glfwSwapBuffers(m_internal);
+        m_size_changed = false;
     }
     
     void Window::initInstance() {
@@ -282,5 +289,7 @@ namespace onip {
         glfwSwapInterval(m_config & Config_DisableVsync ? 0 : 1);
     
         glViewport(m_viewport_offset[0], m_viewport_offset[1], m_size.x, m_size.y);
+        m_size_changed = true;
+        m_position_changed = true;
     }
 }

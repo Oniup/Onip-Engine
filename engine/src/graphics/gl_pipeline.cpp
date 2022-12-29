@@ -6,6 +6,7 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <stb/stb_image.h>
+#include <glm/gtc/matrix_transform.hpp>
 
 namespace onip {
     GlPipeline::GlPipeline()
