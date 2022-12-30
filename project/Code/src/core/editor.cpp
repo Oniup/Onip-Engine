@@ -36,7 +36,7 @@ public:
     ONIP_INLINE const char* getName() override { return "Moving Sprite Transform To Left"; }
 
     void onUpdate() override {
-        m_transform->position.x += 0.00001f;
+        m_transform->position.x += 1.0f * Time::getDeltaTime();
     }
 private:
     Transform* m_transform { nullptr };
@@ -61,6 +61,9 @@ void Editor::initializeRequirements() {
 
     entity = Ecs::createEntity("Main Camera");
     Ecs::addComponent<Camera>(entity);
+    Transform* camera_transform = Ecs::getComponent<Transform>(entity);
+    camera_transform->rotation = glm::vec4(0.0f, 0.0f, -1.0f, 0.0f);
+    camera_transform->scale = glm::vec3(0.0f, 1.0f, 0.0f);
 
     Ecs::debugPrintComponentGroups();
 }

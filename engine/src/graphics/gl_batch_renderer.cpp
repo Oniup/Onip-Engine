@@ -19,8 +19,8 @@ namespace onip {
         for (std::tuple<Transform*, Camera*> camera : m_rendering_cameras) {
             glm::mat4 view = glm::lookAt(
                 std::get<Transform*>(camera)->position, 
-                std::get<Camera*>(camera)->forward + std::get<Transform*>(camera)->position,
-                std::get<Camera*>(camera)->up
+                glm::vec3(std::get<Transform*>(camera)->rotation) + std::get<Transform*>(camera)->position,
+                std::get<Transform*>(camera)->scale
             );
 
             for (Batch& batch : m_batches) {
@@ -36,20 +36,6 @@ namespace onip {
                 );
                 glUniformMatrix4fv(glGetUniformLocation(batch.shader->id, "u_projection_matrix"),1, false, &std::get<Camera*>(camera)->projection_matrix[0][0]);
                 glUniformMatrix4fv(glGetUniformLocation(batch.shader->id, "u_view_matrix"), 1, false, &view[0][0]);
-
-                // static bool first = true;
-                // if (first) {
-                //     std::cout << "vertices:\n";
-                //     for (size_t i = 0; i < batch.vertices.size(); i += ONIP_RAW_VERTEX_SIZE) {
-                //         std::cout << "pos: " << batch.vertices[i] << ", " << batch.vertices[i + 1] << ", " << batch.vertices[i + 2];
-                //         std::cout << ", overlay_color_index: " << batch.vertices[i + 3] << ", " << "transform_index: " << ", " << batch.vertices[i + 4] << "\n";
-                //     }
-                //     std::cout << "indices:\n";
-                //     for (uint32_t& index : batch.indices) {
-                //         std::cout << index << " ";
-                //     }
-                //     first = false;
-                // }
 
                 glBindBuffer(GL_ARRAY_BUFFER, m_vertex_buffer);
                 glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(float) * batch.vertices.size(), &batch.vertices[0]);

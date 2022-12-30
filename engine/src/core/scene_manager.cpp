@@ -15,8 +15,13 @@ namespace onip {
     }
 
     void SceneManager::onUpdate() {
+        // TODO: add fixed update here
+        Time::calcDeltaTime();
         for (CustomSystem* system : m_active_scene->systems) {
             system->onUpdate();
+        }
+        for (CustomSystem* system : m_active_scene->systems) {
+            system->onLateUpdate();
         }
 
         m_active_scene->component_manager.clearDestroyedBuffer();

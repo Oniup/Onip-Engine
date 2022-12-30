@@ -51,6 +51,10 @@ namespace onip {
         GlPipeline::Material* material { nullptr };
     };
 
+    // Note: Transform Comp with Camera:
+    // - position   = position
+    // - rotation   = forward
+    // - scale      = up
     struct Camera {
         Camera() = default;
         ~Camera() = default;
@@ -61,8 +65,6 @@ namespace onip {
             Projection_Perspective
         };
 
-        glm::vec3 up { glm::vec3(0.0f, 1.0f, 0.0f) };
-        glm::vec3 forward { glm::vec3(0.0f, 0.0f, -1.0f) };
         float fov { 45.0f };
         float near_plane { 0.0f };
         float far_plane { 100.0f };

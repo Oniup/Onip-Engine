@@ -45,17 +45,41 @@ namespace onip {
         static uint32_t randUint32();
         static uint64_t randUint64();
 
-        static int findGcd(int a, int b) {
-            if (a == 0) {
-                return b;
-            }
-            else if (b == 0) {
-                return a;
-            }
+        static int findGcd(int a, int b);
 
-            int result = a % b;
-            return findGcd(b, result);
-        }
+        class Stopwatch {
+        public:
+            Stopwatch() = default;
+            Stopwatch(float duration);
+
+            void startTimer(float duration);
+            bool finished() const;
+
+            float getTotalDuration() const;
+            float getDurationLeft() const;
+            float getStartTime() const;
+            float getEndTime() const;
+
+            float getTotalDurationMil() const;
+            float getDurationLeftMil() const;
+            float getStartTimeMil() const;
+            float getEndTimeMil() const;
+        private:
+            float m_start { 0.0f };
+            float m_end { 0.0f };
+        };
+    };
+
+    struct Time {
+        static float getElapsed();
+        static float getElapsedMil();
+        static float getDeltaTime();
+        static float getFixedDeltaTime();
+        static void calcDeltaTime();
+        static void calcFixedDeltaTime();
+    private:
+        static float s_delta_time;
+        static float s_fixed_delta_time;
     };
 }
 

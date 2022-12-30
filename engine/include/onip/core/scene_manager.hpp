@@ -18,7 +18,10 @@ namespace onip {
     public:
         ONIP_INLINE virtual const char* getName() = 0;
 
-        virtual void onUpdate() = 0;
+        virtual void onStart() {};
+        virtual void onUpdate() {};
+        virtual void onFixedUpdate() {};
+        virtual void onLateUpdate() {};
     };
 
     struct Scene {
