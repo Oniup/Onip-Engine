@@ -62,10 +62,11 @@ namespace onip {
         };
 
         glm::vec3 up { glm::vec3(0.0f, 1.0f, 0.0f) };
-        glm::vec3 forward { glm::vec3(0.0f, 0.0f, 1.0f) };
+        glm::vec3 forward { glm::vec3(0.0f, 0.0f, -1.0f) };
         float fov { 45.0f };
         float near_plane { 0.0f };
         float far_plane { 100.0f };
+        float ortho_scale { 100.0f };
         Projection projection { Projection_Orthographic };
         glm::mat4 projection_matrix { glm::mat4(1.0f) };
     };

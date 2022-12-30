@@ -34,10 +34,7 @@ namespace onip {
                     glGetUniformLocation(batch.shader->id, "u_model_matrices"),
                     static_cast<int>(batch.model_matrices.size()), false, &batch.model_matrices[0][0][0]
                 );
-                glUniformMatrix4fv(
-                    glGetUniformLocation(batch.shader->id, "u_projection_matrix"),
-                    1, false, &std::get<Camera*>(camera)->projection_matrix[0][0]
-                );
+                glUniformMatrix4fv(glGetUniformLocation(batch.shader->id, "u_projection_matrix"),1, false, &std::get<Camera*>(camera)->projection_matrix[0][0]);
                 glUniformMatrix4fv(glGetUniformLocation(batch.shader->id, "u_view_matrix"), 1, false, &view[0][0]);
 
                 // static bool first = true;

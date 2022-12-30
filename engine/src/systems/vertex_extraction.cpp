@@ -63,9 +63,9 @@ namespace onip {
                 for (Camera* camera : camera_cameras) {
                     switch (camera->projection) {
                     case Camera::Projection_Orthographic: {
-                        float half_width = static_cast<float>(GlPipeline::getWindow()->getSize().x / 2);
-                        float half_height = static_cast<float>(GlPipeline::getWindow()->getSize().y / 2);
-                        camera->projection_matrix = glm::ortho(-half_width, half_width, -half_height, half_height);
+                        float x = static_cast<float>(GlPipeline::getWindow()->getSize().x) / camera->ortho_scale;
+                        float y = static_cast<float>(GlPipeline::getWindow()->getSize().y) / camera->ortho_scale;
+                        camera->projection_matrix = glm::ortho(-x, x, -y, y);
                     } break;
                     case Camera::Projection_Perspective: {
                         camera->projection_matrix = glm::perspective(

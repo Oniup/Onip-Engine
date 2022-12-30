@@ -21,7 +21,7 @@ uniform vec4 u_overlay_colors[MAX_OVERLAY_COLOR_SIZE];
 out vec4 overlay_color;
 
 void main() {
-    gl_Position = u_model_matrices[int(a_transform_id)] * vec4(a_position.xyz, 1.0);
+    gl_Position = u_projection_matrix * u_view_matrix * u_model_matrices[int(a_transform_id)] * vec4(a_position.xyz, 1.0);
 
     overlay_color = u_overlay_colors[int(a_overlay_color_index)];
 }

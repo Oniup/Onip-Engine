@@ -44,6 +44,18 @@ namespace onip {
         static int randInt32();
         static uint32_t randUint32();
         static uint64_t randUint64();
+
+        static int findGcd(int a, int b) {
+            if (a == 0) {
+                return b;
+            }
+            else if (b == 0) {
+                return a;
+            }
+
+            int result = a % b;
+            return findGcd(b, result);
+        }
     };
 }
 
