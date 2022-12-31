@@ -24,6 +24,28 @@ namespace onip {
             );
 
             for (Batch& batch : m_batches) {
+#ifndef NDEBUG
+                static bool first_time_printing_for_first_batch = true;
+                if (first_time_printing_for_first_batch) {
+                    std::cout << "vertex data:\n";
+                    size_t j = 0;
+                    for (size_t i = 0; i < batch.vertices.size(); i += ONIP_RAW_VERTEX_FLOAT_ELEMENT_COUNT) {
+                        if (j > 3) {
+                            j = 0;
+                            std::cout << "\n";
+                        }
+                        std::cout << "[" << batch.vertices[i] << ", " << batch.vertices[i + 1] << ", " << batch.vertices[i + 2] << "]\t";
+                        std::cout << batch.vertices[i + 3] << "\t" << batch.vertices[i + 4] << "\n";
+                        j++;
+                    }
+                    std::cout << "\nindex data:\n";
+                    for (size_t i = 0; i < batch.indices.size(); i += 3) {
+                        std::cout << batch.indices[i] << ", " << batch.indices[i + 1] << ", " << batch.indices[i + 2] << "\n";
+                    }
+                    first_time_printing_for_first_batch = false;
+                }
+#endif // NDEBUG
+
                 glUseProgram(batch.shader->id);
 
                 glUniform4fv(
@@ -37,10 +59,22 @@ namespace onip {
                 glUniformMatrix4fv(glGetUniformLocation(batch.shader->id, "u_projection_matrix"),1, false, &std::get<Camera*>(camera)->projection_matrix[0][0]);
                 glUniformMatrix4fv(glGetUniformLocation(batch.shader->id, "u_view_matrix"), 1, false, &view[0][0]);
 
-                glBindBuffer(GL_ARRAY_BUFFER, m_vertex_buffer);
-                glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(float) * batch.vertices.size(), &batch.vertices[0]);
-                glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_element_buffer);
-                glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, sizeof(uint32_t) * batch.indices.size(), &batch.indices[0]);
+                glBindBuffer(GL_ARRAY_BUFFER, m_vertex_buffer.id);
+                if (m_vertex_buffer.size != batch.vertices.size()) {
+                    m_vertex_buffer.size = batch.vertices.size();
+                    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * m_vertex_buffer.size, &batch.vertices[0], GL_DYNAMIC_DRAW);
+                }
+                else {
+                    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(float) * m_vertex_buffer.size, &batch.vertices[0]);
+                }
+                glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_element_buffer.id);
+                if (m_element_buffer.size != batch.indices.size()) {
+                    m_element_buffer.size = batch.indices.size();
+                    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint32_t) * m_element_buffer.size, &batch.indices[0], GL_DYNAMIC_DRAW);
+                }
+                else {
+                    glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, sizeof(uint32_t) * m_element_buffer.size, &batch.indices[0]);
+                }
 
                 glDrawElements(GL_TRIANGLES, static_cast<int>(batch.indices.size()), GL_UNSIGNED_INT, (void*)0);
             }
@@ -86,13 +120,13 @@ namespace onip {
             glGenVertexArrays(1, &m_vertex_array);
             glBindVertexArray(m_vertex_array);
 
-            glGenBuffers(1, &m_element_buffer);
-            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_element_buffer);
-            glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint32_t) * 2 * ONIP_MAX_VERTEX_BUFFER_SIZE, nullptr, GL_DYNAMIC_DRAW);
+            glGenBuffers(1, &m_element_buffer.id);
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_element_buffer.id);
+            glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_element_buffer.size, nullptr, GL_DYNAMIC_DRAW);
 
-            glGenBuffers(1, &m_vertex_buffer);
-            glBindBuffer(GL_ARRAY_BUFFER, m_vertex_buffer);
-            glBufferData(GL_ARRAY_BUFFER, ONIP_RAW_VERTEX_SIZE * ONIP_MAX_VERTEX_BUFFER_SIZE, nullptr, GL_DYNAMIC_DRAW);
+            glGenBuffers(1, &m_vertex_buffer.id);
+            glBindBuffer(GL_ARRAY_BUFFER, m_vertex_buffer.id);
+            glBufferData(GL_ARRAY_BUFFER, m_vertex_buffer.size, nullptr, GL_DYNAMIC_DRAW);
 
             glEnableVertexAttribArray(0);   // position
             glEnableVertexAttribArray(1);   // overlay_color_index
@@ -154,8 +188,8 @@ namespace onip {
                     }
                     if (!found_overlay_color) {
                         batch->overlay_colors.push_back(*overlay_color);
+                        overlay_color_index = static_cast<float>(batch->overlay_colors.size() - 1);
                     }
-
                     break;
                 }
             }
@@ -198,6 +232,12 @@ namespace onip {
                 batch->indices.begin() + indices_start_position,
                 reserve->vertex_data->indices.begin(), reserve->vertex_data->indices.end()
             );
+            if (indices_start_position != 0) {
+                int index_offset = indices_start_position / 2 + 1;
+                for (size_t i = indices_start_position; i < batch->indices.size(); i++) {
+                    batch->indices[i] += index_offset;
+                }
+            }
 
             m_reserves.erase(reserve);
         }

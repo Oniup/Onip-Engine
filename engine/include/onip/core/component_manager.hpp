@@ -233,7 +233,7 @@ namespace onip {
         void destroyComponent(_Component* component) {
             ComponentMeta* meta = getMetaFromComp(component);
             Pool* target_pool = getPoolWhichContains<_Component>();
-            m_destroying.push_back(new ComponentDestroyingData { meta, target_pool });
+            m_destroying.emplace_back(new ComponentDestroyingData { meta, target_pool });
         }
 
         template <typename _Component>

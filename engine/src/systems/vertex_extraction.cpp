@@ -27,7 +27,6 @@ namespace onip {
             std::vector<Camera*> camera_cameras = std::move(Ecs::getAllOfComponent<Camera>());
             std::vector<Transform*> camera_transforms {};
             camera_transforms.resize(camera_cameras.size());
-            size_t i = 0;
 
             for (void* ptr : *m_target_pool) {
                 if (Pool::isNull(ptr)) {
@@ -37,12 +36,19 @@ namespace onip {
                 ComponentMeta* meta = static_cast<ComponentMeta*>(ptr);
                 if (Ecs::checkIfSameComponentType<Transform>(meta)) {
                     Transform* transform = Ecs::getComponentFromMeta<Transform>(meta);
-                    m_batch_renderer->pushTransform(meta->entity->uuid, transform);
-
-                    if (meta->entity->uuid == Ecs::getMetaFromComponent(camera_cameras[i])->entity->uuid) {
-                        camera_transforms[i] = transform;
-                        i++;
+                    bool camera_found = false;
+                    for (size_t i = 0; i < camera_cameras.size(); i++) {
+                        Camera* camera = camera_cameras[i];
+                        if (Ecs::getMetaFromComponent(camera)->entity->uuid == meta->entity->uuid) {
+                            camera_found = true;
+                            camera_transforms[i] = transform;
+                            break;
+                        }
                     }
+                    if (camera_found) {
+                        continue;
+                    }
+                    m_batch_renderer->pushTransform(meta->entity->uuid, transform);
                 }
                 else if (Ecs::checkIfSameComponentType<MeshRenderer>(meta)) {
                     MeshRenderer* mesh_renderer = Ecs::getComponentFromMeta<MeshRenderer>(meta);

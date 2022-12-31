@@ -47,7 +47,6 @@ namespace onip {
         ONIP_INLINE static void loadEmpty() { Application::getSceneManager()->implLoadEmpty(); }
         ONIP_INLINE static void loadExisting(std::string_view scene_path) { Application::getSceneManager()->implLoadExisting(scene_path); }
         ONIP_INLINE static void serialize(Scene* scene) { Application::getSceneManager()->implSerialize(scene); }
-        ONIP_INLINE static void pushScene(CustomSystem* system) { Application::getSceneManager()->getActiveScene()->systems.push_back(system); }
 
         void onUpdate() override;
     private:
@@ -99,7 +98,11 @@ namespace onip {
         ONIP_INLINE static Entity* createEntity(const char* tag, uint32_t layer, bool is_dynamic = true) { return Application::getSceneManager()->getActiveScene()->entity_manager.createEntity(tag, layer, is_dynamic); }
 
         template <typename _System, typename ... _Args>
-        ONIP_INLINE static void addCustomSystem(_Args ... args) { Application::getSceneManager()->getActiveScene()->systems.push_back(new _System { args... }); };
+        ONIP_INLINE static void addCustomSystem(_Args ... args) { 
+            std::vector<CustomSystem*>& systems = Application::getSceneManager()->getActiveScene()->systems;
+            systems.push_back(new _System { args... });
+            systems.back()->onStart();
+        };
     };
 }
 

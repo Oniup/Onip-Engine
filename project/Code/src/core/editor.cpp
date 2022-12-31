@@ -29,11 +29,19 @@ Editor::~Editor() {
 
 class MovingSpriteTransformToLeft : public CustomSystem {
 public:
-    MovingSpriteTransformToLeft(Entity* entity) {
-        m_transform = Ecs::getComponent<Transform>(entity);
-    }
+    MovingSpriteTransformToLeft() = default;
     ~MovingSpriteTransformToLeft() = default;
     ONIP_INLINE const char* getName() override { return "Moving Sprite Transform To Left"; }
+
+    void onStart() override {
+        Entity* entity = Ecs::createEntity("Player");
+        SpriteRenderer* sprite_renderer = Ecs::addComponent<SpriteRenderer>(entity);
+        sprite_renderer->overlay_color = glm::vec4(0.2f, 0.5f, 0.6f, 1.0f);
+        sprite_renderer->material = GlPipeline::getMaterial("Sprite Default");
+        sprite_renderer->sprite = GlPipeline::getTexture("Box Test");
+        m_transform = Ecs::getComponent<Transform>(entity);
+        // m_transform->position.z += 2.0f;
+    }
 
     void onUpdate() override {
         m_transform->position.x += 1.0f * Time::getDeltaTime();
@@ -44,20 +52,20 @@ private:
 
 void Editor::initializeRequirements() {
     GlBatchRenderer* batch_renderer =  static_cast<GlBatchRenderer*>(GlPipeline::createRenderer(new GlBatchRenderer()));
+    GlPipeline::createTexture("Box Test", "engine/assets/textures/test_crate.png");
     
     SceneManager::loadEmpty();
-
-    Ecs::addCustomSystem<GraphicsVertexExtractionSystem>(batch_renderer);
-
     Ecs::createComponentGroup<Transform, SpriteRenderer, MeshRenderer>();
     Ecs::createComponentGroup<Camera>();
 
-    entity = Ecs::createEntity("Player");
+    Ecs::addCustomSystem<GraphicsVertexExtractionSystem>(batch_renderer);
+    Ecs::addCustomSystem<MovingSpriteTransformToLeft>();
+
+    Entity* entity = Ecs::createEntity("Other");
     SpriteRenderer* sprite_renderer = Ecs::addComponent<SpriteRenderer>(entity);
-    sprite_renderer->overlay_color = glm::vec4(0.2f, 0.5f, 0.6f, 1.0f);
+    sprite_renderer->overlay_color = glm::vec4(0.7f, 0.5f, 0.2f, 1.0f);
     sprite_renderer->material = GlPipeline::getMaterial("Sprite Default");
-    sprite_renderer->sprite = GlPipeline::createTexture("Box Test", "engine/assets/textures/test_crate.png");
-    Ecs::addCustomSystem<MovingSpriteTransformToLeft>(entity);
+    sprite_renderer->sprite = GlPipeline::getTexture("Box Test");
 
     entity = Ecs::createEntity("Main Camera");
     Ecs::addComponent<Camera>(entity);

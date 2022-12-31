@@ -43,7 +43,7 @@ if (MSVC)
         set(FINAL_ASSETS_DIR ${CMAKE_BINARY_DIR}/project/Debug/engine)
     endif ()
 else ()
-    set(FINAL_ASSETS_DIR ${CMAKE_BINARY_DIR}/onip/engine)
+    set(FINAL_ASSETS_DIR ${CMAKE_BINARY_DIR}/engine)
 endif ()
 
 add_custom_target(ONIP_ASSETS

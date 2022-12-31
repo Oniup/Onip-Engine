@@ -15,17 +15,19 @@ namespace onip {
     }
 
     void SceneManager::onUpdate() {
-        // TODO: add fixed update here
-        Time::calcDeltaTime();
-        for (CustomSystem* system : m_active_scene->systems) {
-            system->onUpdate();
-        }
-        for (CustomSystem* system : m_active_scene->systems) {
-            system->onLateUpdate();
-        }
+        if (m_active_scene != nullptr) {
+            // TODO: add fixed update here
+            Time::calcDeltaTime();
+            for (CustomSystem* system : m_active_scene->systems) {
+                system->onUpdate();
+            }
+            for (CustomSystem* system : m_active_scene->systems) {
+                system->onLateUpdate();
+            }
 
-        m_active_scene->component_manager.clearDestroyedBuffer();
-        m_active_scene->entity_manager.clearDestroyedBuffer();
+            m_active_scene->component_manager.clearDestroyedBuffer();
+            m_active_scene->entity_manager.clearDestroyedBuffer();
+        }
     }
 
     void SceneManager::implSetActive(std::string_view scene_name) {

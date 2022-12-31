@@ -19,7 +19,7 @@ namespace onip {
     class GlBatchRenderer : public GlPipeline::Renderer {
     public:
         GlBatchRenderer();
-        ~GlBatchRenderer() = default;
+        ~GlBatchRenderer() override = default;
 
         void onDraw() override;
 
@@ -49,14 +49,19 @@ namespace onip {
             const glm::vec4* overlay_color { nullptr };
             const Transform* transform { nullptr };
         };
+        
+        struct VertexBuffer {
+            uint32_t id {};
+            uint32_t size {};
+        };
 
         void initializeVertexData();
-        std::vector<GlBatchRenderer::Reserve>::iterator GlBatchRenderer::getReserve(UUID entity_id);
+        std::vector<GlBatchRenderer::Reserve>::iterator getReserve(UUID entity_id);
         void pushReserveToBatch(std::vector<Reserve>::iterator reserve);
 
         uint32_t m_vertex_array { 0 };
-        uint32_t m_vertex_buffer { 0 };
-        uint32_t m_element_buffer { 0 };
+        VertexBuffer m_vertex_buffer {};
+        VertexBuffer m_element_buffer {};
         std::vector<Batch> m_batches {};
         std::vector<Reserve> m_reserves {};
         std::vector<std::tuple<Transform*, Camera*>> m_rendering_cameras {};

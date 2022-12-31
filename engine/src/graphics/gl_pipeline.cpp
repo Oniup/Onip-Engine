@@ -11,8 +11,6 @@
 namespace onip {
     GlPipeline::GlPipeline()
         : ApplicationLayer("Graphics GLPipeline") {
-        assert(glfwInit() && "failed to initialize glfw for some reason ...");
-
         m_window = Window(
             "Onip Game engine", Window::Resolution_Maximize,
             (Window::Config)(Window::Config_DisableVsync | Window::Config_UpdateViewportPerFrame)
@@ -46,8 +44,6 @@ namespace onip {
         for (Renderer* renderer : m_renderers) {
             delete renderer;
         }
-        m_window.~Window();
-        glfwTerminate();
     }
 
     void GlPipeline::onUpdate() {

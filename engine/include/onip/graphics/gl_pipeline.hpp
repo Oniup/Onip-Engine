@@ -3,8 +3,8 @@
 
 #include "onip/config.hpp"
 #include "onip/utils/utils.hpp"
-#include "onip/Core/application.hpp"
-#include "onip/Core/application_layer.hpp"
+#include "onip/core/application.hpp"
+#include "onip/core/application_layer.hpp"
 #include "onip/graphics/window.hpp"
 
 #include <array>
@@ -20,7 +20,7 @@ namespace onip {
         class Renderer {
         public:
             Renderer(std::string_view name) : m_name(name) {}
-            ~Renderer() = default;
+            virtual ~Renderer() = default;
             const std::string getName() const { return m_name; }
             virtual void onDraw() = 0;
         private:
