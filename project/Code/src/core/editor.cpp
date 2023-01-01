@@ -6,6 +6,7 @@
 #include <onip/components/graphics_comps.hpp>
 #include <onip/graphics/gl_pipeline.hpp>
 #include <onip/systems/vertex_extraction.hpp>
+#include <onip/core/input.hpp>
 #include <glm/glm.hpp>
 
 using namespace onip;
@@ -44,7 +45,23 @@ public:
     }
 
     void onUpdate() override {
-        m_transform->position.x += 1.0f * Time::getDeltaTime();
+        glm::vec3 direction = glm::vec3(0.0f);
+        if (Input::getKey(Input::Keyboard_W)) {
+            direction.y += 1.0f;
+        }
+        if (Input::getKey(Input::Keyboard_S)) {
+            direction.y -= 1.0f;
+        }
+        if (Input::getKey(Input::Keyboard_A)) {
+            direction.x -= 1.0f;
+        }
+        if (Input::getKey(Input::Keyboard_D)) {
+            direction.x += 1.0f;
+        }
+        float mag = glm::length(direction);
+        if (mag > 0.0f) {
+            m_transform->position += glm::normalize(direction) * 5.0f * Time::getDeltaTime();
+        }
     }
 private:
     Transform* m_transform { nullptr };

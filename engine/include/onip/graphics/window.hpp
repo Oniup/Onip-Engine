@@ -55,7 +55,7 @@ namespace onip {
         Window& operator=(const Window& other);
         Window& operator=(Window&& other);
     
-        ONIP_INLINE GLFWwindow* internalWindow() const { return m_internal; }
+        ONIP_INLINE GLFWwindow* getInternalWindow() const { return m_internal; }
         ONIP_INLINE const glm::ivec2& getSize() const { return m_size; }
         ONIP_INLINE const glm::ivec2& getPosition() const { return m_position; }
         ONIP_INLINE const std::string& getTitle() const { return m_title; }
