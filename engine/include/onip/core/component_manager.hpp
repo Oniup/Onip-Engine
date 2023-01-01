@@ -283,21 +283,23 @@ namespace onip {
                 std::cout << "\n";
 
                 uint32_t released_fround = 0;
-                for (void* ptr : *group->pool) {
-                    if (Pool::isNull(ptr)) {
-                        if (released_fround == group->pool->getAllocationReleased()) {
-                            break;
+                if (group->pool->getAllocations() > 0) {
+                    for (void* ptr : *group->pool) {
+                        if (Pool::isNull(ptr)) {
+                            if (released_fround == group->pool->getAllocationReleased()) {
+                                break;
+                            }
+                            released_fround++;
+                            continue;
                         }
-                        released_fround++;
-                        continue;
-                    }
 
-                    ComponentMeta* meta = static_cast<ComponentMeta*>(ptr);
-                    std::cout << "Id: " << meta->comp_id << "\tEntity UUID: " << meta->entity->uuid;
-                    if (meta->entity->tag != nullptr) {
-                        std::cout << "\tEntity Tag: " << *meta->entity->tag;
+                        ComponentMeta* meta = static_cast<ComponentMeta*>(ptr);
+                        std::cout << "Id: " << meta->comp_id << "\tEntity UUID: " << meta->entity->uuid;
+                        if (meta->entity->tag != nullptr) {
+                            std::cout << "\tEntity Tag: " << *meta->entity->tag;
+                        }
+                        std::cout << "\n";
                     }
-                    std::cout << "\n";
                 }
                 std::cout << "\n";
                 group_index++;

@@ -40,7 +40,6 @@ public:
         sprite_renderer->material = GlPipeline::getMaterial("Sprite Default");
         sprite_renderer->sprite = GlPipeline::getTexture("Box Test");
         m_transform = Ecs::getComponent<Transform>(entity);
-        // m_transform->position.z += 2.0f;
     }
 
     void onUpdate() override {

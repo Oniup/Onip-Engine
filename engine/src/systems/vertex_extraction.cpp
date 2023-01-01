@@ -52,14 +52,14 @@ namespace onip {
                 }
                 else if (Ecs::checkIfSameComponentType<MeshRenderer>(meta)) {
                     MeshRenderer* mesh_renderer = Ecs::getComponentFromMeta<MeshRenderer>(meta);
-                    m_batch_renderer->pushVertexData(meta->entity->uuid, &mesh_renderer->vertex_data);
-                    m_batch_renderer->pushMaterial(meta->entity->uuid, mesh_renderer->material);
+                    m_batch_renderer->pushVertexData(meta->entity->uuid, &mesh_renderer->vertex_data, mesh_renderer->render_layer);
+                    m_batch_renderer->pushMaterial(meta->entity->uuid, mesh_renderer->material, mesh_renderer->render_layer);
                 }
                 else if (Ecs::checkIfSameComponentType<SpriteRenderer>(meta)) {
                     SpriteRenderer* sprite_renderer = Ecs::getComponentFromMeta<SpriteRenderer>(meta);
-                    m_batch_renderer->pushVertexData(meta->entity->uuid, &sprite_renderer->vertex_data);
+                    m_batch_renderer->pushVertexData(meta->entity->uuid, &sprite_renderer->vertex_data, sprite_renderer->render_layer);
                     m_batch_renderer->pushMaterial(
-                        meta->entity->uuid, sprite_renderer->material, 
+                        meta->entity->uuid, sprite_renderer->material, sprite_renderer->render_layer,
                         sprite_renderer->overlay_color != glm::vec4(0.0f) ? &sprite_renderer->overlay_color : nullptr
                     );
                 }

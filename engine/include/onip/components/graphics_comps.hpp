@@ -26,6 +26,7 @@ namespace onip {
         bool flip_x { false };
         bool flip_y { false };
         glm::vec4 overlay_color { glm::vec4(0.0f, 0.0f, 0.0f, 0.0f) };
+        uint32_t render_layer {};
 
         GlPipeline::Material* material { nullptr };
         GlPipeline::Texture* sprite { nullptr };
@@ -47,6 +48,7 @@ namespace onip {
         ~MeshRenderer() = default;
         static constexpr uint32_t getId() { return 2; }
 
+        uint32_t render_layer {};
         GlPipeline::VertexData vertex_data { {}, {} };
         GlPipeline::Material* material { nullptr };
     };

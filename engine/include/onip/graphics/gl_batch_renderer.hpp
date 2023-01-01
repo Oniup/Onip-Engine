@@ -13,6 +13,7 @@
 
 #include <glm/glm.hpp>
 #include <vector>
+#include <list>
 #include <tuple>
 
 namespace onip {
@@ -24,8 +25,8 @@ namespace onip {
         void onDraw() override;
 
         void pushTransform(UUID entity_id, const Transform* transform);
-        void pushVertexData(UUID entity_id, const GlPipeline::VertexData* vertices);
-        void pushMaterial(UUID entity_id, const GlPipeline::Material* material, const glm::vec4* overlay_color = nullptr);
+        void pushVertexData(UUID entity_id, const GlPipeline::VertexData* vertices, uint32_t render_layer);
+        void pushMaterial(UUID entity_id, const GlPipeline::Material* material, uint32_t render_layer, const glm::vec4* overlay_color = nullptr);
         void pushRenderingCameras(const std::vector<Camera*>& cameras, const std::vector<Transform*>& camera_transforms);
     private:
         struct Batch {
@@ -44,6 +45,7 @@ namespace onip {
             ~Reserve() = default;
 
             UUID entity_id {};
+            uint32_t render_layer {};
             const GlPipeline::VertexData* vertex_data { nullptr };
             const GlPipeline::Material* material { nullptr };
             const glm::vec4* overlay_color { nullptr };
@@ -56,13 +58,13 @@ namespace onip {
         };
 
         void initializeVertexData();
-        std::vector<GlBatchRenderer::Reserve>::iterator getReserve(UUID entity_id);
+        std::vector<Reserve>::iterator getReserve(UUID entity_id);
         void pushReserveToBatch(std::vector<Reserve>::iterator reserve);
 
         uint32_t m_vertex_array { 0 };
         VertexBuffer m_vertex_buffer {};
         VertexBuffer m_element_buffer {};
-        std::vector<Batch> m_batches {};
+        std::list<Batch> m_batches {};
         std::vector<Reserve> m_reserves {};
         std::vector<std::tuple<Transform*, Camera*>> m_rendering_cameras {};
     };

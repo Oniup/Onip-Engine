@@ -61,7 +61,7 @@ namespace onip {
 
                 glBindBuffer(GL_ARRAY_BUFFER, m_vertex_buffer.id);
                 if (m_vertex_buffer.size != batch.vertices.size()) {
-                    m_vertex_buffer.size = batch.vertices.size();
+                    m_vertex_buffer.size = static_cast<uint32_t>(batch.vertices.size());
                     glBufferData(GL_ARRAY_BUFFER, sizeof(float) * m_vertex_buffer.size, &batch.vertices[0], GL_DYNAMIC_DRAW);
                 }
                 else {
@@ -69,7 +69,7 @@ namespace onip {
                 }
                 glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_element_buffer.id);
                 if (m_element_buffer.size != batch.indices.size()) {
-                    m_element_buffer.size = batch.indices.size();
+                    m_element_buffer.size = static_cast<uint32_t>(batch.indices.size());
                     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint32_t) * m_element_buffer.size, &batch.indices[0], GL_DYNAMIC_DRAW);
                 }
                 else {
@@ -93,13 +93,13 @@ namespace onip {
         pushReserveToBatch(reserve);
     }
 
-    void GlBatchRenderer::pushVertexData(UUID entity_id, const GlPipeline::VertexData* vertices) {
+    void GlBatchRenderer::pushVertexData(UUID entity_id, const GlPipeline::VertexData* vertices, uint32_t render_layer) {
         std::vector<Reserve>::iterator reserve = getReserve(entity_id);
         reserve->vertex_data = vertices;
         pushReserveToBatch(reserve);
     }
 
-    void GlBatchRenderer::pushMaterial(UUID entity_id, const GlPipeline::Material* material, const glm::vec4* overlay_color) {
+    void GlBatchRenderer::pushMaterial(UUID entity_id, const GlPipeline::Material* material, uint32_t render_layer, const glm::vec4* overlay_color) {
         std::vector<Reserve>::iterator reserve = getReserve(entity_id);
         reserve->material = material;
         reserve->overlay_color = overlay_color;
@@ -233,7 +233,7 @@ namespace onip {
                 reserve->vertex_data->indices.begin(), reserve->vertex_data->indices.end()
             );
             if (indices_start_position != 0) {
-                int index_offset = indices_start_position / 2 + 1;
+                int index_offset = static_cast<int>(indices_start_position) / 2 + 1;
                 for (size_t i = indices_start_position; i < batch->indices.size(); i++) {
                     batch->indices[i] += index_offset;
                 }
