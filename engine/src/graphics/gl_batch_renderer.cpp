@@ -92,13 +92,13 @@ namespace onip {
     void GlBatchRenderer::pushTransform(UUID entity_id, const Transform* transform) {
         std::vector<Reserve>::iterator reserve = getReserve(entity_id);
         reserve->transform = transform;
-        pushReserveToBatch(reserve);
+        pushReserveIntoBatch(reserve);
     }
 
     void GlBatchRenderer::pushVertexData(UUID entity_id, const GlPipeline::VertexData* vertices) {
         std::vector<Reserve>::iterator reserve = getReserve(entity_id);
         reserve->vertex_data = vertices;
-        pushReserveToBatch(reserve);
+        pushReserveIntoBatch(reserve);
     }
 
     void GlBatchRenderer::pushMaterial(UUID entity_id, const GlPipeline::Material* material, uint32_t render_layer, const glm::vec4* overlay_color) {
@@ -106,7 +106,7 @@ namespace onip {
         reserve->material = material;
         reserve->overlay_color = overlay_color;
         reserve->render_layer = render_layer;
-        pushReserveToBatch(reserve);
+        pushReserveIntoBatch(reserve);
     }
 
     void GlBatchRenderer::pushRenderingCameras(const std::vector<Camera*>& cameras, const std::vector<Transform*>& camera_transforms) {
@@ -155,7 +155,7 @@ namespace onip {
         return reserve;
     }
 
-    void GlBatchRenderer::pushReserveToBatch(std::vector<Reserve>::iterator reserve) {
+    void GlBatchRenderer::pushReserveIntoBatch(std::vector<Reserve>::iterator reserve) {
         bool add_to_batch = false;
         if (reserve->vertex_data != nullptr) {
             if (reserve->material != nullptr) {
@@ -176,103 +176,120 @@ namespace onip {
             model = glm::scale(model, reserve->transform->scale);
             model = glm::rotate(model, glm::radians(reserve->transform->rotation.w), glm::vec3(reserve->transform->rotation));
 
-            std::list<RenderLayer>::iterator matching_layer {};
-            bool render_layer_found = false;
-            for (std::list<RenderLayer>::iterator layer = m_batches.begin(); layer != m_batches.end(); layer++) {
-                if (layer->layer == reserve->render_layer) {
-                    render_layer_found = true;
-                    matching_layer = layer;
-                    for (Batch& existing_batch : layer->batches) {
-                        if (existing_batch.shader->id == reserve->material->shader->id) {
-                            batch = &existing_batch;
-
-                            bool found_overlay_color = false;
-                            const glm::vec4* overlay_color = reserve->overlay_color != nullptr ? reserve->overlay_color : &reserve->material->color_overlay;
-                            for (size_t i = 0; i < batch->overlay_colors.size(); i++) {
-                                if (batch->overlay_colors[i] == *overlay_color) {
-                                    overlay_color_index = static_cast<float>(i);
-                                    found_overlay_color = true;
-                                    break;
-                                }
-                            }
-                            if (!found_overlay_color) {
-                                batch->overlay_colors.push_back(*overlay_color);
-                                overlay_color_index = static_cast<float>(batch->overlay_colors.size() - 1);
-                            }
-                            break;
-                        }
-                    }
-                }
-            }
-
+            RenderLayer* render_layer = getExistingRenderLayer(reserve->render_layer);
+            batch = getExistingBatchFromLayer(render_layer, reserve, overlay_color_index);
             if (batch == nullptr) {
-                if (!render_layer_found) {
-                    bool added = false;
-                    if (m_batches.size() > 0) {
-                        for (std::list<RenderLayer>::iterator layer = m_batches.begin(); layer != m_batches.end(); layer++) {
-                            if (reserve->render_layer < layer->layer) {
-                                if (layer == m_batches.begin()) {
-                                    m_batches.push_front(RenderLayer {});
-                                    matching_layer = m_batches.begin();
-                                }
-                                else {
-                                    matching_layer = m_batches.insert(layer--, RenderLayer {});
-                                }
-                                added = true;
-                                break;
-                            }
-                        }
-                    }
-                    if (!added) {
-                        m_batches.push_back(RenderLayer {});
-                        matching_layer = m_batches.begin();
-                        matching_layer->layer = reserve->render_layer;
-                    }
-                }
-                matching_layer->batches.push_back(Batch {});
-                batch = &matching_layer->batches.back();
-                batch->shader = reserve->material->shader;
-                if (reserve->overlay_color != nullptr) {
-                    batch->overlay_colors.push_back(*reserve->overlay_color);
-                }
-                else {
-                    batch->overlay_colors.push_back(reserve->material->color_overlay);
-                }
-                overlay_color_index = static_cast<float>(batch->overlay_colors.size() - 1);
+                batch = addNewBatchIntoLayer(render_layer, reserve, overlay_color_index);
             }
-
             batch->model_matrices.emplace_back(std::move(model));
             transform_index = static_cast<float>(batch->model_matrices.size() - 1);
 
-            size_t vertices_start_position = batch->vertices.size();
-            size_t indices_start_position = batch->indices.size();
-            batch->vertices.resize(batch->vertices.size() + reserve->vertex_data->vertices.size() * ONIP_RAW_VERTEX_FLOAT_ELEMENT_COUNT);
-
-            size_t j = 0;
-            for (size_t i = vertices_start_position; i < batch->vertices.size(); i += ONIP_RAW_VERTEX_FLOAT_ELEMENT_COUNT) {
-                const GlPipeline::Vertex& pipeline_vertex = reserve->vertex_data->vertices[j];
-
-                batch->vertices[i    ] = pipeline_vertex.position.x;
-                batch->vertices[i + 1] = pipeline_vertex.position.y;
-                batch->vertices[i + 2] = pipeline_vertex.position.z;
-                batch->vertices[i + 3] = overlay_color_index;
-                batch->vertices[i + 4] = transform_index;
-
-                j++;
-            }
-
-            batch->indices.insert(
-                batch->indices.begin() + indices_start_position,
-                reserve->vertex_data->indices.begin(), reserve->vertex_data->indices.end()
-            );
-            if (indices_start_position != 0) {
-                int index_offset = static_cast<int>(indices_start_position) / 2 + 1;
-                for (size_t i = indices_start_position; i < batch->indices.size(); i++) {
-                    batch->indices[i] += index_offset;
-                }
-            }
+            pushReserveDataIntoBatch(reserve, batch, overlay_color_index, transform_index);
 
             m_reserves.erase(reserve);
+        }
+    }
+
+    GlBatchRenderer::RenderLayer* GlBatchRenderer::getExistingRenderLayer(uint32_t layer) {
+        for (RenderLayer& render_layer : m_batches) {
+            if (render_layer.layer == layer) {
+                return &render_layer;
+            }
+        }
+        return nullptr;
+    }
+
+    GlBatchRenderer::Batch* GlBatchRenderer::getExistingBatchFromLayer(RenderLayer* render_layer, const std::vector<Reserve>::iterator& reserve, float& overlay_color_index) {
+        Batch* batch = nullptr;
+        if (render_layer != nullptr) {
+            for (Batch& existing_batch : render_layer->batches) {
+                if (existing_batch.shader->id == reserve->material->shader->id) {
+                    batch = &existing_batch;
+
+                    bool found_overlay_color = false;
+                    const glm::vec4* overlay_color = reserve->overlay_color != nullptr ? reserve->overlay_color : &reserve->material->color_overlay;
+                    for (size_t i = 0; i < batch->overlay_colors.size(); i++) {
+                        if (batch->overlay_colors[i] == *overlay_color) {
+                            overlay_color_index = static_cast<float>(i);
+                            found_overlay_color = true;
+                            break;
+                        }
+                    }
+                    if (!found_overlay_color) {
+                        batch->overlay_colors.push_back(*overlay_color);
+                        overlay_color_index = static_cast<float>(batch->overlay_colors.size() - 1);
+                    }
+                    break;
+                }
+            }
+        }
+        return batch;
+    }
+
+    GlBatchRenderer::Batch* GlBatchRenderer::addNewBatchIntoLayer(RenderLayer* render_layer, const std::vector<Reserve>::iterator& reserve, float& overlay_color_index) {
+        if (render_layer == nullptr) {
+            bool added = false;
+            if (m_batches.size() > 0) {
+                for (std::list<RenderLayer>::iterator layer = m_batches.begin(); layer != m_batches.end(); layer++) {
+                    if (reserve->render_layer < layer->layer) {
+                        if (layer == m_batches.begin()) {
+                            m_batches.push_front(RenderLayer {});
+                            render_layer = &m_batches.front();
+                        }
+                        else {
+                            render_layer = &*m_batches.insert(layer--, RenderLayer {});
+                        }
+                        added = true;
+                        break;
+                    }
+                }
+            }
+            if (!added) {
+                m_batches.push_back(RenderLayer {});
+                render_layer = &m_batches.front();
+                render_layer->layer = reserve->render_layer;
+            }
+        }
+        render_layer->batches.push_back(Batch {});
+        Batch* batch = &render_layer->batches.back();
+        batch->shader = reserve->material->shader;
+        if (reserve->overlay_color != nullptr) {
+            batch->overlay_colors.push_back(*reserve->overlay_color);
+        }
+        else {
+            batch->overlay_colors.push_back(reserve->material->color_overlay);
+        }
+        overlay_color_index = static_cast<float>(batch->overlay_colors.size() - 1);
+        return batch;
+    }
+
+    void GlBatchRenderer::pushReserveDataIntoBatch(const std::vector<Reserve>::iterator& reserve, Batch* batch, float overlay_color_index, float transform_index) {
+        size_t vertices_start_position = batch->vertices.size();
+        size_t indices_start_position = batch->indices.size();
+        batch->vertices.resize(batch->vertices.size() + reserve->vertex_data->vertices.size() * ONIP_RAW_VERTEX_FLOAT_ELEMENT_COUNT);
+
+        size_t j = 0;
+        for (size_t i = vertices_start_position; i < batch->vertices.size(); i += ONIP_RAW_VERTEX_FLOAT_ELEMENT_COUNT) {
+            const GlPipeline::Vertex& pipeline_vertex = reserve->vertex_data->vertices[j];
+
+            batch->vertices[i    ] = pipeline_vertex.position.x;
+            batch->vertices[i + 1] = pipeline_vertex.position.y;
+            batch->vertices[i + 2] = pipeline_vertex.position.z;
+            batch->vertices[i + 3] = overlay_color_index;
+            batch->vertices[i + 4] = transform_index;
+
+            j++;
+        }
+
+        batch->indices.insert(
+            batch->indices.begin() + indices_start_position,
+            reserve->vertex_data->indices.begin(), reserve->vertex_data->indices.end()
+        );
+        if (indices_start_position != 0) {
+            int index_offset = static_cast<int>(indices_start_position) / 2 + 1;
+            for (size_t i = indices_start_position; i < batch->indices.size(); i++) {
+                batch->indices[i] += index_offset;
+            }
         }
     }
 }

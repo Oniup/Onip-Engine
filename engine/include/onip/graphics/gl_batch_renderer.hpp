@@ -67,7 +67,11 @@ namespace onip {
 
         void initializeVertexData();
         std::vector<Reserve>::iterator getReserve(UUID entity_id);
-        void pushReserveToBatch(std::vector<Reserve>::iterator reserve);
+        void pushReserveIntoBatch(std::vector<Reserve>::iterator reserve);
+        RenderLayer* getExistingRenderLayer(uint32_t layer);
+        Batch* getExistingBatchFromLayer(RenderLayer* render_layer, const std::vector<Reserve>::iterator& reserve, float& overlay_color_index);
+        Batch* addNewBatchIntoLayer(RenderLayer* render_layer, const std::vector<Reserve>::iterator& reserve, float& overlay_color_index);
+        void pushReserveDataIntoBatch(const std::vector<Reserve>::iterator& reserve, Batch* batch, float overlay_color_index, float transform_index);
 
         uint32_t m_vertex_array { 0 };
         VertexBuffer m_vertex_buffer {};
