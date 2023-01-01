@@ -25,7 +25,7 @@ namespace onip {
         void onDraw() override;
 
         void pushTransform(UUID entity_id, const Transform* transform);
-        void pushVertexData(UUID entity_id, const GlPipeline::VertexData* vertices, uint32_t render_layer);
+        void pushVertexData(UUID entity_id, const GlPipeline::VertexData* vertices);
         void pushMaterial(UUID entity_id, const GlPipeline::Material* material, uint32_t render_layer, const glm::vec4* overlay_color = nullptr);
         void pushRenderingCameras(const std::vector<Camera*>& cameras, const std::vector<Transform*>& camera_transforms);
     private:
@@ -38,6 +38,14 @@ namespace onip {
             std::vector<glm::vec4> overlay_colors {};
             std::vector<glm::mat4> model_matrices {};
             const GlPipeline::Shader* shader { nullptr };
+        };
+
+        struct RenderLayer {
+            RenderLayer() = default;
+            ~RenderLayer() = default;
+
+            uint32_t layer {};
+            std::list<Batch> batches {};
         };
 
         struct Reserve {
@@ -64,7 +72,7 @@ namespace onip {
         uint32_t m_vertex_array { 0 };
         VertexBuffer m_vertex_buffer {};
         VertexBuffer m_element_buffer {};
-        std::list<Batch> m_batches {};
+        std::list<RenderLayer> m_batches {};
         std::vector<Reserve> m_reserves {};
         std::vector<std::tuple<Transform*, Camera*>> m_rendering_cameras {};
     };

@@ -23,65 +23,67 @@ namespace onip {
                 std::get<Transform*>(camera)->scale
             );
 
-            for (Batch& batch : m_batches) {
+            static bool first_time_printing_for_first_batch = true;
+            for (RenderLayer& layer : m_batches) {
+                for (Batch& batch : layer.batches) {
 #ifndef NDEBUG
-                static bool first_time_printing_for_first_batch = true;
-                if (first_time_printing_for_first_batch) {
-                    std::cout << "vertex data:\n";
-                    size_t j = 0;
-                    for (size_t i = 0; i < batch.vertices.size(); i += ONIP_RAW_VERTEX_FLOAT_ELEMENT_COUNT) {
-                        if (j > 3) {
-                            j = 0;
-                            std::cout << "\n";
+                    if (first_time_printing_for_first_batch) {
+                        std::cout << "vertex data:\n";
+                        size_t j = 0;
+                        for (size_t i = 0; i < batch.vertices.size(); i += ONIP_RAW_VERTEX_FLOAT_ELEMENT_COUNT) {
+                            if (j > 3) {
+                                j = 0;
+                                std::cout << "\n";
+                            }
+                            std::cout << "[" << batch.vertices[i] << ", " << batch.vertices[i + 1] << ", " << batch.vertices[i + 2] << "]\t";
+                            std::cout << batch.vertices[i + 3] << "\t" << batch.vertices[i + 4] << "\n";
+                            j++;
                         }
-                        std::cout << "[" << batch.vertices[i] << ", " << batch.vertices[i + 1] << ", " << batch.vertices[i + 2] << "]\t";
-                        std::cout << batch.vertices[i + 3] << "\t" << batch.vertices[i + 4] << "\n";
-                        j++;
+                        std::cout << "\nindex data:\n";
+                        for (size_t i = 0; i < batch.indices.size(); i += 3) {
+                            std::cout << batch.indices[i] << ", " << batch.indices[i + 1] << ", " << batch.indices[i + 2] << "\n";
+                        }
                     }
-                    std::cout << "\nindex data:\n";
-                    for (size_t i = 0; i < batch.indices.size(); i += 3) {
-                        std::cout << batch.indices[i] << ", " << batch.indices[i + 1] << ", " << batch.indices[i + 2] << "\n";
-                    }
-                    first_time_printing_for_first_batch = false;
-                }
 #endif // NDEBUG
 
-                glUseProgram(batch.shader->id);
+                    glUseProgram(batch.shader->id);
 
-                glUniform4fv(
-                    glGetUniformLocation(batch.shader->id, "u_overlay_colors"), 
-                    static_cast<int>(batch.overlay_colors.size()), &batch.overlay_colors[0][0]
-                );
-                glUniformMatrix4fv(
-                    glGetUniformLocation(batch.shader->id, "u_model_matrices"),
-                    static_cast<int>(batch.model_matrices.size()), false, &batch.model_matrices[0][0][0]
-                );
-                glUniformMatrix4fv(glGetUniformLocation(batch.shader->id, "u_projection_matrix"),1, false, &std::get<Camera*>(camera)->projection_matrix[0][0]);
-                glUniformMatrix4fv(glGetUniformLocation(batch.shader->id, "u_view_matrix"), 1, false, &view[0][0]);
+                    glUniform4fv(
+                        glGetUniformLocation(batch.shader->id, "u_overlay_colors"), 
+                        static_cast<int>(batch.overlay_colors.size()), &batch.overlay_colors[0][0]
+                    );
+                    glUniformMatrix4fv(
+                        glGetUniformLocation(batch.shader->id, "u_model_matrices"),
+                        static_cast<int>(batch.model_matrices.size()), false, &batch.model_matrices[0][0][0]
+                    );
+                    glUniformMatrix4fv(glGetUniformLocation(batch.shader->id, "u_projection_matrix"),1, false, &std::get<Camera*>(camera)->projection_matrix[0][0]);
+                    glUniformMatrix4fv(glGetUniformLocation(batch.shader->id, "u_view_matrix"), 1, false, &view[0][0]);
 
-                glBindBuffer(GL_ARRAY_BUFFER, m_vertex_buffer.id);
-                if (m_vertex_buffer.size != batch.vertices.size()) {
-                    m_vertex_buffer.size = static_cast<uint32_t>(batch.vertices.size());
-                    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * m_vertex_buffer.size, &batch.vertices[0], GL_DYNAMIC_DRAW);
-                }
-                else {
-                    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(float) * m_vertex_buffer.size, &batch.vertices[0]);
-                }
-                glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_element_buffer.id);
-                if (m_element_buffer.size != batch.indices.size()) {
-                    m_element_buffer.size = static_cast<uint32_t>(batch.indices.size());
-                    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint32_t) * m_element_buffer.size, &batch.indices[0], GL_DYNAMIC_DRAW);
-                }
-                else {
-                    glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, sizeof(uint32_t) * m_element_buffer.size, &batch.indices[0]);
+                    glBindBuffer(GL_ARRAY_BUFFER, m_vertex_buffer.id);
+                    if (m_vertex_buffer.size != batch.vertices.size()) {
+                        m_vertex_buffer.size = static_cast<uint32_t>(batch.vertices.size());
+                        glBufferData(GL_ARRAY_BUFFER, sizeof(float) * m_vertex_buffer.size, &batch.vertices[0], GL_DYNAMIC_DRAW);
+                    }
+                    else {
+                        glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(float) * m_vertex_buffer.size, &batch.vertices[0]);
+                    }
+                    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_element_buffer.id);
+                    if (m_element_buffer.size != batch.indices.size()) {
+                        m_element_buffer.size = static_cast<uint32_t>(batch.indices.size());
+                        glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint32_t) * m_element_buffer.size, &batch.indices[0], GL_DYNAMIC_DRAW);
+                    }
+                    else {
+                        glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, sizeof(uint32_t) * m_element_buffer.size, &batch.indices[0]);
+                    }
+
+                    glDrawElements(GL_TRIANGLES, static_cast<int>(batch.indices.size()), GL_UNSIGNED_INT, (void*)0);
                 }
 
-                glDrawElements(GL_TRIANGLES, static_cast<int>(batch.indices.size()), GL_UNSIGNED_INT, (void*)0);
             }
-
-            glUseProgram(0);
-            glBindVertexArray(0);
+            first_time_printing_for_first_batch = false;
         }
+        glBindVertexArray(0);
+        glUseProgram(0);
 
         m_batches.clear();
         m_reserves.clear();
@@ -93,7 +95,7 @@ namespace onip {
         pushReserveToBatch(reserve);
     }
 
-    void GlBatchRenderer::pushVertexData(UUID entity_id, const GlPipeline::VertexData* vertices, uint32_t render_layer) {
+    void GlBatchRenderer::pushVertexData(UUID entity_id, const GlPipeline::VertexData* vertices) {
         std::vector<Reserve>::iterator reserve = getReserve(entity_id);
         reserve->vertex_data = vertices;
         pushReserveToBatch(reserve);
@@ -103,6 +105,7 @@ namespace onip {
         std::vector<Reserve>::iterator reserve = getReserve(entity_id);
         reserve->material = material;
         reserve->overlay_color = overlay_color;
+        reserve->render_layer = render_layer;
         pushReserveToBatch(reserve);
     }
 
@@ -173,30 +176,61 @@ namespace onip {
             model = glm::scale(model, reserve->transform->scale);
             model = glm::rotate(model, glm::radians(reserve->transform->rotation.w), glm::vec3(reserve->transform->rotation));
 
-            for (Batch& existing_batch : m_batches) {
-                if (existing_batch.shader->id == reserve->material->shader->id) {
-                    batch = &existing_batch;
+            std::list<RenderLayer>::iterator matching_layer {};
+            bool render_layer_found = false;
+            for (std::list<RenderLayer>::iterator layer = m_batches.begin(); layer != m_batches.end(); layer++) {
+                if (layer->layer == reserve->render_layer) {
+                    render_layer_found = true;
+                    matching_layer = layer;
+                    for (Batch& existing_batch : layer->batches) {
+                        if (existing_batch.shader->id == reserve->material->shader->id) {
+                            batch = &existing_batch;
 
-                    bool found_overlay_color = false;
-                    const glm::vec4* overlay_color = reserve->overlay_color != nullptr ? reserve->overlay_color : &reserve->material->color_overlay;
-                    for (size_t i = 0; i < batch->overlay_colors.size(); i++) {
-                        if (batch->overlay_colors[i] == *overlay_color) {
-                            overlay_color_index = static_cast<float>(i);
-                            found_overlay_color = true;
+                            bool found_overlay_color = false;
+                            const glm::vec4* overlay_color = reserve->overlay_color != nullptr ? reserve->overlay_color : &reserve->material->color_overlay;
+                            for (size_t i = 0; i < batch->overlay_colors.size(); i++) {
+                                if (batch->overlay_colors[i] == *overlay_color) {
+                                    overlay_color_index = static_cast<float>(i);
+                                    found_overlay_color = true;
+                                    break;
+                                }
+                            }
+                            if (!found_overlay_color) {
+                                batch->overlay_colors.push_back(*overlay_color);
+                                overlay_color_index = static_cast<float>(batch->overlay_colors.size() - 1);
+                            }
                             break;
                         }
                     }
-                    if (!found_overlay_color) {
-                        batch->overlay_colors.push_back(*overlay_color);
-                        overlay_color_index = static_cast<float>(batch->overlay_colors.size() - 1);
-                    }
-                    break;
                 }
             }
 
             if (batch == nullptr) {
-                m_batches.push_back({});
-                batch = &m_batches.back();
+                if (!render_layer_found) {
+                    bool added = false;
+                    if (m_batches.size() > 0) {
+                        for (std::list<RenderLayer>::iterator layer = m_batches.begin(); layer != m_batches.end(); layer++) {
+                            if (reserve->render_layer < layer->layer) {
+                                if (layer == m_batches.begin()) {
+                                    m_batches.push_front(RenderLayer {});
+                                    matching_layer = m_batches.begin();
+                                }
+                                else {
+                                    matching_layer = m_batches.insert(layer--, RenderLayer {});
+                                }
+                                added = true;
+                                break;
+                            }
+                        }
+                    }
+                    if (!added) {
+                        m_batches.push_back(RenderLayer {});
+                        matching_layer = m_batches.begin();
+                        matching_layer->layer = reserve->render_layer;
+                    }
+                }
+                matching_layer->batches.push_back(Batch {});
+                batch = &matching_layer->batches.back();
                 batch->shader = reserve->material->shader;
                 if (reserve->overlay_color != nullptr) {
                     batch->overlay_colors.push_back(*reserve->overlay_color);
@@ -213,7 +247,6 @@ namespace onip {
             size_t vertices_start_position = batch->vertices.size();
             size_t indices_start_position = batch->indices.size();
             batch->vertices.resize(batch->vertices.size() + reserve->vertex_data->vertices.size() * ONIP_RAW_VERTEX_FLOAT_ELEMENT_COUNT);
-            // batch->indices.resize(batch->indices.size() + reserve->vertex_data->indices.size());
 
             size_t j = 0;
             for (size_t i = vertices_start_position; i < batch->vertices.size(); i += ONIP_RAW_VERTEX_FLOAT_ELEMENT_COUNT) {
