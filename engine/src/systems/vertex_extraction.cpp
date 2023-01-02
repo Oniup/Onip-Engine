@@ -58,6 +58,7 @@ namespace onip {
                 else if (Ecs::checkIfSameComponentType<SpriteRenderer>(meta)) {
                     SpriteRenderer* sprite_renderer = Ecs::getComponentFromMeta<SpriteRenderer>(meta);
                     m_batch_renderer->pushVertexData(meta->entity->uuid, &sprite_renderer->vertex_data);
+                    m_batch_renderer->pushOverrideTextures(meta->entity->uuid, { sprite_renderer->sprite }, { sprite_renderer->sprite_specular }, { sprite_renderer->sprite_ambient });
                     m_batch_renderer->pushMaterial(
                         meta->entity->uuid, sprite_renderer->material, sprite_renderer->render_layer,
                         sprite_renderer->overlay_color != glm::vec4(0.0f) ? &sprite_renderer->overlay_color : nullptr

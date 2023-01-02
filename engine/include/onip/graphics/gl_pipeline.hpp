@@ -87,9 +87,9 @@ namespace onip {
             std::string name {};
             UUID uuid { Utils::randUint64() };
             const Shader* shader { nullptr };
-            std::vector<Texture*> diffuse_textures {};
-            std::vector<Texture*> specular_textures {};
-            std::vector<Texture*> ambient_textures {};
+            std::vector<const Texture*> diffuse_textures {};
+            std::vector<const Texture*> specular_textures {};
+            std::vector<const Texture*> ambient_textures {};
             float specular_shininess {};
             glm::vec4 color_overlay { glm::vec4(0.0f, 0.0f, 0.0f, 0.0f) };
 

@@ -14,7 +14,6 @@ namespace onip {
     }
 
     void GlBatchRenderer::onDraw() {
-        // FIXME: Optimise and make more robust in the future
         glBindVertexArray(m_vertex_array);
         for (std::tuple<Transform*, Camera*> camera : m_rendering_cameras) {
             glm::mat4 view = glm::lookAt(
@@ -103,10 +102,36 @@ namespace onip {
 
     void GlBatchRenderer::pushMaterial(UUID entity_id, const GlPipeline::Material* material, uint32_t render_layer, const glm::vec4* overlay_color) {
         std::vector<Reserve>::iterator reserve = getReserve(entity_id);
-        reserve->material = material;
-        reserve->overlay_color = overlay_color;
-        reserve->render_layer = render_layer;
-        pushReserveIntoBatch(reserve);
+
+        size_t texture_count = material->diffuse_textures.size() + material->specular_textures.size() + material->ambient_textures.size();
+        size_t override_texture_count = reserve->override_diffuse_textures.size() + reserve->override_specular_textures.size() + reserve->override_ambient_textures.size();
+        if (texture_count + override_texture_count < GlPipeline::getMaxTextureUnitsPerFrag()) {
+            reserve->material = material;
+            reserve->overlay_color = overlay_color;
+            reserve->render_layer = render_layer;
+            pushReserveIntoBatch(reserve);
+
+            return;
+        }
+        std::cout << "Cannot push Material to Reserve due to the override_texture_count (" << override_texture_count << ") + material texture count (" << texture_count << ") exceed the max texture count (" << GlPipeline::getMaxTextureUnitsPerFrag() << "\n";
+    }
+
+    void GlBatchRenderer::pushOverrideTextures(UUID entity_id, const std::vector<const GlPipeline::Texture*>& override_diffuse, const std::vector<const GlPipeline::Texture*>& override_specular, const std::vector<const GlPipeline::Texture*>& override_ambient) {
+        std::vector<Reserve>::iterator reserve = getReserve(entity_id);
+
+        size_t override_texture_count = override_diffuse.size() + override_specular.size() + override_ambient.size();
+        size_t material_texture_count = 0;
+        if (reserve->material != nullptr) {
+            material_texture_count = reserve->material->diffuse_textures.size() + reserve->material->specular_textures.size() + reserve->material->ambient_textures.size();
+        }
+        if (override_texture_count + material_texture_count < GlPipeline::getMaxTextureUnitsPerFrag()) {
+            reserve->override_diffuse_textures = override_diffuse;
+            reserve->override_specular_textures = override_specular;
+            reserve->override_ambient_textures = override_ambient;
+
+            return;
+        }
+        std::cout << "Cannot push Material to Reserve due to the override_texture_count (" << override_texture_count << ") + material texture count (" << material_texture_count << ") exceed the max texture count (" << GlPipeline::getMaxTextureUnitsPerFrag() << "\n";
     }
 
     void GlBatchRenderer::pushRenderingCameras(const std::vector<Camera*>& cameras, const std::vector<Transform*>& camera_transforms) {
@@ -131,13 +156,17 @@ namespace onip {
             glBindBuffer(GL_ARRAY_BUFFER, m_vertex_buffer.id);
             glBufferData(GL_ARRAY_BUFFER, m_vertex_buffer.size, nullptr, GL_DYNAMIC_DRAW);
 
-            glEnableVertexAttribArray(0);   // position
-            glEnableVertexAttribArray(1);   // overlay_color_index
-            glEnableVertexAttribArray(2);   // transform_index;
+            glEnableVertexAttribArray(0);   // position             = 0
+            glEnableVertexAttribArray(1);   // overlay_color_index  = 3
+            glEnableVertexAttribArray(2);   // transform_index      = 4
+            glEnableVertexAttribArray(3);   // uv                   = 5
+            glEnableVertexAttribArray(4);   // diffuse_range        = 7
 
             glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, ONIP_RAW_VERTEX_SIZE, (void*)0);
             glVertexAttribPointer(1, 1, GL_FLOAT, GL_FALSE, ONIP_RAW_VERTEX_SIZE, (void*)(sizeof(float) * 3));
             glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, ONIP_RAW_VERTEX_SIZE, (void*)(sizeof(float) * 4));
+            glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, ONIP_RAW_VERTEX_SIZE, (void*)(sizeof(float) * 5));
+            glVertexAttribPointer(4, 2, GL_FLOAT, GL_FALSE, ONIP_RAW_VERTEX_SIZE, (void*)(sizeof(float) * 7));
 
             glBindVertexArray(0);
         }
@@ -176,21 +205,39 @@ namespace onip {
             model = glm::scale(model, reserve->transform->scale);
             model = glm::rotate(model, glm::radians(reserve->transform->rotation.w), glm::vec3(reserve->transform->rotation));
 
+            // FIXME: Make this take a iterator not just a pointer
             RenderLayer* render_layer = getExistingRenderLayer(reserve->render_layer);
             batch = getExistingBatchFromLayer(render_layer, reserve, overlay_color_index);
+
+            glm::vec2 diffuse_range {};
+            glm::vec2 specular_range {};
+            glm::vec2 ambient_range {};
+
             if (batch == nullptr) {
                 batch = addNewBatchIntoLayer(render_layer, reserve, overlay_color_index);
+                pushReserveTextureDataIntoBatch(reserve, batch, &diffuse_range, &specular_range, &ambient_range);
             }
+            else {
+                if (!pushReserveTextureDataIntoBatch(reserve, batch, &diffuse_range, &specular_range, &ambient_range)) {
+                    // FIXME: find another batch that could possibly fit it, other add another one
+                    // because after the first batch in the layer cannot fit anymore textures in, it'll
+                    // always create a new batch and waste them if they can fit more textures in
+                    batch = addNewBatchIntoLayer(render_layer, reserve, overlay_color_index);
+                    pushReserveTextureDataIntoBatch(reserve, batch, &diffuse_range, &specular_range, &ambient_range);
+                }
+            }
+
             batch->model_matrices.emplace_back(std::move(model));
             transform_index = static_cast<float>(batch->model_matrices.size() - 1);
 
-            pushReserveDataIntoBatch(reserve, batch, overlay_color_index, transform_index);
+            pushReserveDataIntoBatch(reserve, batch, overlay_color_index, transform_index, diffuse_range, specular_range, ambient_range);
 
             m_reserves.erase(reserve);
         }
     }
 
     GlBatchRenderer::RenderLayer* GlBatchRenderer::getExistingRenderLayer(uint32_t layer) {
+        // FIXME: change to use a iterator
         for (RenderLayer& render_layer : m_batches) {
             if (render_layer.layer == layer) {
                 return &render_layer;
@@ -250,6 +297,7 @@ namespace onip {
                 render_layer->layer = reserve->render_layer;
             }
         }
+
         render_layer->batches.push_back(Batch {});
         Batch* batch = &render_layer->batches.back();
         batch->shader = reserve->material->shader;
@@ -263,7 +311,7 @@ namespace onip {
         return batch;
     }
 
-    void GlBatchRenderer::pushReserveDataIntoBatch(const std::vector<Reserve>::iterator& reserve, Batch* batch, float overlay_color_index, float transform_index) {
+    void GlBatchRenderer::pushReserveDataIntoBatch(const std::vector<Reserve>::iterator& reserve, Batch* batch, float overlay_color_index, float transform_index, const glm::vec2& diffuse_range, const glm::vec2& specular_range, const glm::vec2& ambient_range) {
         size_t vertices_start_position = batch->vertices.size();
         size_t indices_start_position = batch->indices.size();
         batch->vertices.resize(batch->vertices.size() + reserve->vertex_data->vertices.size() * ONIP_RAW_VERTEX_FLOAT_ELEMENT_COUNT);
@@ -277,6 +325,10 @@ namespace onip {
             batch->vertices[i + 2] = pipeline_vertex.position.z;
             batch->vertices[i + 3] = overlay_color_index;
             batch->vertices[i + 4] = transform_index;
+            batch->vertices[i + 5] = pipeline_vertex.uv.x;
+            batch->vertices[i + 6] = pipeline_vertex.uv.y;
+            batch->vertices[i + 7] = diffuse_range.x;
+            batch->vertices[i + 8] = diffuse_range.y;
 
             j++;
         }
@@ -291,5 +343,47 @@ namespace onip {
                 batch->indices[i] += index_offset;
             }
         }
+    }
+
+    bool GlBatchRenderer::pushReserveTextureDataIntoBatch(const std::vector<Reserve>::iterator& reserve, Batch* batch, glm::vec2* diffuse_range, glm::vec2* specular_range, glm::vec2* ambient_range) {
+        size_t current_texture_size = batch->diffuse_textures.size() + batch->specular_textures.size() + batch->ambient_textures.size();
+        const std::vector<const GlPipeline::Texture*>* diffuse = reserve->override_diffuse_textures.size() == 0 ? &reserve->material->diffuse_textures : &reserve->override_diffuse_textures;
+        const std::vector<const GlPipeline::Texture*>* specular = reserve->override_specular_textures.size() == 0 ? &reserve->material->specular_textures : &reserve->override_specular_textures;
+        const std::vector<const GlPipeline::Texture*>* ambient = reserve->override_ambient_textures.size() == 0 ? &reserve->material->ambient_textures : &reserve->override_ambient_textures;
+        size_t total_size = current_texture_size + diffuse->size() + specular->size() + ambient->size();
+
+        if (total_size < GlPipeline::getMaxTextureUnitsPerFrag()) {
+            diffuse_range->x = static_cast<float>(batch->diffuse_textures.size());
+            specular_range->x = static_cast<float>(batch->specular_textures.size());
+            ambient_range->x = static_cast<float>(batch->ambient_textures.size());
+
+            batch->diffuse_textures.resize(batch->diffuse_textures.size() + diffuse->size());
+            batch->specular_textures.resize(batch->specular_textures.size() + specular->size());
+            batch->ambient_textures.resize(batch->ambient_textures.size() + ambient->size());
+
+            // define the number of textures from the x (starting position) the current frag will use
+            diffuse_range->y = static_cast<float>(batch->diffuse_textures.size()) - diffuse_range->x;
+            specular_range->y = static_cast<float>(batch->specular_textures.size()) - specular_range->x;
+            ambient_range->y = static_cast<float>(batch->ambient_textures.size()) - ambient_range->x;
+
+            size_t j = 0;
+            for (size_t i = static_cast<size_t>(diffuse_range->x); batch->diffuse_textures.size(); i++) {
+                batch->diffuse_textures[i] = diffuse->at(j)->id;
+                j++;
+            }
+            j = 0;
+            for (size_t i = static_cast<size_t>(specular_range->x); batch->specular_textures.size(); i++) {
+                batch->specular_textures[i] = specular->at(j)->id;
+                j++;
+            }
+            j = 0;
+            for (size_t i = static_cast<size_t>(ambient_range->x); batch->ambient_textures.size(); i++) {
+                batch->ambient_textures[i] = ambient->at(j)->id;
+                j++;
+            }
+
+            return true;
+        }
+        return false;
     }
 }
