@@ -37,7 +37,7 @@ public:
     void onStart() override {
         Entity* entity = Ecs::createEntity("Player");
         SpriteRenderer* sprite_renderer = Ecs::addComponent<SpriteRenderer>(entity);
-        sprite_renderer->overlay_color = glm::vec4(0.2f, 0.5f, 0.6f, 1.0f);
+        sprite_renderer->overlay_color = glm::vec4(0.2f, 0.5f, 0.6f, 0.1f);
         sprite_renderer->material = GlPipeline::getMaterial("Sprite Default");
         sprite_renderer->sprite = GlPipeline::getTexture("Box Test");
         sprite_renderer->render_layer = 20;
@@ -80,7 +80,6 @@ void Editor::initializeRequirements() {
 
     Entity* entity = Ecs::createEntity("Other");
     SpriteRenderer* sprite_renderer = Ecs::addComponent<SpriteRenderer>(entity);
-    sprite_renderer->overlay_color = glm::vec4(0.7f, 0.5f, 0.2f, 1.0f);
     sprite_renderer->material = GlPipeline::getMaterial("Sprite Default");
     sprite_renderer->sprite = GlPipeline::getTexture("Box Test");
     sprite_renderer->render_layer = 10;
