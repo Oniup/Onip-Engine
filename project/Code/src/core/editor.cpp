@@ -84,11 +84,19 @@ void Editor::initializeRequirements() {
     sprite_renderer->sprite = GlPipeline::getTexture("Box Test");
     sprite_renderer->render_layer = 10;
 
+    entity = Ecs::createEntity("Other");
+    Transform* transform = Ecs::getComponent<Transform>(entity);
+    transform->position = glm::vec3(5.0f, 10.0f, 0.0f);
+    sprite_renderer = Ecs::addComponent<SpriteRenderer>(entity);
+    sprite_renderer->material = GlPipeline::getMaterial("Sprite Default");
+    sprite_renderer->sprite = GlPipeline::getTexture("Box Test");
+    sprite_renderer->render_layer = 10;
+
     entity = Ecs::createEntity("Main Camera");
     Ecs::addComponent<Camera>(entity);
-    Transform* camera_transform = Ecs::getComponent<Transform>(entity);
-    camera_transform->rotation = glm::vec4(0.0f, 0.0f, -1.0f, 0.0f);
-    camera_transform->scale = glm::vec3(0.0f, 1.0f, 0.0f);
+    transform = Ecs::getComponent<Transform>(entity);
+    transform->rotation = glm::vec4(0.0f, 0.0f, -1.0f, 0.0f);
+    transform->scale = glm::vec3(0.0f, 1.0f, 0.0f);
 
     Ecs::debugPrintComponentGroups();
 }
