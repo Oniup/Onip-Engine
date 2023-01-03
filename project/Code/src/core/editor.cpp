@@ -1,4 +1,5 @@
 #include "core/editor.hpp"
+#include "core/panel_handler.hpp"
 
 #include <onip/config.hpp>
 #include <onip/core/scene_manager.hpp>
