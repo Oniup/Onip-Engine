@@ -367,17 +367,17 @@ namespace onip {
             ambient_range->y = static_cast<float>(batch->ambient_textures.size()) - ambient_range->x;
 
             size_t j = 0;
-            for (size_t i = static_cast<size_t>(diffuse_range->x); batch->diffuse_textures.size(); i++) {
+            for (size_t i = static_cast<size_t>(diffuse_range->x); i < batch->diffuse_textures.size(); i++) {
                 batch->diffuse_textures[i] = diffuse->at(j)->id;
                 j++;
             }
             j = 0;
-            for (size_t i = static_cast<size_t>(specular_range->x); batch->specular_textures.size(); i++) {
+            for (size_t i = static_cast<size_t>(specular_range->x); i < batch->specular_textures.size(); i++) {
                 batch->specular_textures[i] = specular->at(j)->id;
                 j++;
             }
             j = 0;
-            for (size_t i = static_cast<size_t>(ambient_range->x); batch->ambient_textures.size(); i++) {
+            for (size_t i = static_cast<size_t>(ambient_range->x); i < batch->ambient_textures.size(); i++) {
                 batch->ambient_textures[i] = ambient->at(j)->id;
                 j++;
             }
