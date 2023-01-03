@@ -4,24 +4,32 @@
 #include "onip/graphics/gl_pipeline.hpp"
 #include "onip/core/scene_manager.hpp"
 
+#include <glad/glad.h>
+#include <GLFW/glfw3.h>
+
 namespace onip {
     Application* Application::getInstance() {
         return Config::settingsApplication();
     }
 
     void Application::run() {
-        m_pipeline = static_cast<GLPipeline*>(addLayer(new GLPipeline()));
+        assert(glfwInit() && "failed to initialize glfw for some reason ...");
+
+        m_pipeline = static_cast<GlPipeline*>(addLayer(new GlPipeline()));
         m_scene_manager = static_cast<SceneManager*>(addLayer(new SceneManager()));
 
-        initializeLayers();
-        while (!m_pipeline->getWindow()->isClosing()) {
+        initializeRequirements();
+        while (!GlPipeline::getWindow()->isClosing()) {
             Input::pollEvents();
+            GlPipeline::getWindow()->clearScreen();
             for (ApplicationLayer* layer : m_layers) {
                 layer->onUpdate();
             }
-            m_pipeline->getWindow()->clearScreen();
+            GlPipeline::getWindow()->swapBuffers();
         }
         destroyLayers();
+
+        glfwTerminate();
     }
 
     ApplicationLayer* Application::addLayer(ApplicationLayer* layer) {

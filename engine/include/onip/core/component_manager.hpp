@@ -7,6 +7,7 @@
 
 #include <iostream>
 #include <vector>
+#include <tuple>
 
 namespace onip {
     struct ComponentMeta {
@@ -25,6 +26,11 @@ namespace onip {
         struct ComponentDestroyingData {
             ComponentMeta* meta { nullptr };
             Pool* pool { nullptr };
+        };
+
+        struct ComponentIter {
+            uint32_t index;
+            Pool* currentIter { nullptr };
         };
     public:
         ComponentManager() = default;
@@ -113,7 +119,7 @@ namespace onip {
             return getPoolWhichContains(comp_ids);
         }
 
-        Pool* getPoolWhichContains(const std::vector<uint32_t> comp_ids) {
+        Pool* getPoolWhichContains(const std::vector<uint32_t>& comp_ids) {
 #ifndef NDEBUG
             if (!checkRepeatingIds(comp_ids.data(), comp_ids.size())) {
                 return nullptr;
@@ -187,10 +193,47 @@ namespace onip {
         }
 
         template <typename _Component>
+        std::vector<_Component*> getAll() {
+            Pool* target_pool = getPool<_Component>();
+            if (target_pool != nullptr) {
+                if (target_pool->getAllocations() > 0) {
+                    std::vector<_Component*> comps {};
+
+                    size_t count = 0;
+                    for (void* ptr : *target_pool) {
+                        if (count < target_pool->getAllocations()) {
+                            if (Pool::isNull(ptr)) {
+                                continue;
+                            }
+
+                            ComponentMeta* meta = static_cast<ComponentMeta*>(ptr);
+                            if (meta->comp_id == _Component::getId()) {
+                                comps.push_back(getCompFromMeta<_Component>(meta));
+                            }
+                            count++;
+                        }
+                        else {
+                            break;
+                        }
+                    }
+
+                    return comps;
+                }
+            }
+            
+            return {};
+        }
+
+        template <typename _Component>
+        bool checkIfSameType(ComponentMeta* meta) {
+            return _Component::getId() == meta->comp_id;
+        }
+
+        template <typename _Component>
         void destroyComponent(_Component* component) {
             ComponentMeta* meta = getMetaFromComp(component);
             Pool* target_pool = getPoolWhichContains<_Component>();
-            m_destroying.push_back(new ComponentDestroyingData { meta, target_pool });
+            m_destroying.emplace_back(new ComponentDestroyingData { meta, target_pool });
         }
 
         template <typename _Component>
@@ -240,21 +283,23 @@ namespace onip {
                 std::cout << "\n";
 
                 uint32_t released_fround = 0;
-                for (void* ptr : *group->pool) {
-                    if (Pool::isNull(ptr)) {
-                        if (released_fround == group->pool->getAllocationReleased()) {
-                            break;
+                if (group->pool->getAllocations() > 0) {
+                    for (void* ptr : *group->pool) {
+                        if (Pool::isNull(ptr)) {
+                            if (released_fround == group->pool->getAllocationReleased()) {
+                                break;
+                            }
+                            released_fround++;
+                            continue;
                         }
-                        released_fround++;
-                        continue;
-                    }
 
-                    ComponentMeta* meta = static_cast<ComponentMeta*>(ptr);
-                    std::cout << "Id: " << meta->comp_id << "\tEntity UUID: " << meta->entity->uuid;
-                    if (meta->entity->tag != nullptr) {
-                        std::cout << "\tEntity Tag: " << *meta->entity->tag;
+                        ComponentMeta* meta = static_cast<ComponentMeta*>(ptr);
+                        std::cout << "Id: " << meta->comp_id << "\tEntity UUID: " << meta->entity->uuid;
+                        if (meta->entity->tag != nullptr) {
+                            std::cout << "\tEntity Tag: " << *meta->entity->tag;
+                        }
+                        std::cout << "\n";
                     }
-                    std::cout << "\n";
                 }
                 std::cout << "\n";
                 group_index++;
@@ -267,7 +312,11 @@ namespace onip {
                 for (size_t j = 0; j < ids_size; j++) {
                     if (i != j) {
                         if (ids[i] == ids[j]) {
-                            std::cout << "cannot create component group as there is two ids that are the same\n";
+                            std::cout << "cannot create component group as there is two ids that are the same: [ ";
+                            for (size_t i = 0; i < ids_size; i++) {
+                                std::cout << ids[i] << " ";
+                            }
+                            std::cout << "]\n";
                             return false;
                         }
                     }

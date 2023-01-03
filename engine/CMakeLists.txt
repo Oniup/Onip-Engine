@@ -43,23 +43,15 @@ if (MSVC)
         set(FINAL_ASSETS_DIR ${CMAKE_BINARY_DIR}/project/Debug/engine)
     endif ()
 else ()
-    set(FINAL_ASSETS_DIR ${CMAKE_BINARY_DIR}/onip/engine)
+    set(FINAL_ASSETS_DIR ${CMAKE_BINARY_DIR}/engine)
 endif ()
 
-add_custom_target(default_shaders
-    COMMAND ${CMAKE_COMMAND} -E copy_directory 
-    ${CMAKE_CURRENT_SOURCE_DIR}/assets/shaders
-    ${FINAL_ASSETS_DIR}/shaders
+add_custom_target(ONIP_ASSETS
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+    ${CMAKE_CURRENT_SOURCE_DIR}/assets
+    ${FINAL_ASSETS_DIR}/assets
 )
-add_custom_target(default_textures
-    COMMAND ${CMAKE_COMMAND} -E copy_directory 
-    ${CMAKE_CURRENT_SOURCE_DIR}/assets/textures
-    ${FINAL_ASSETS_DIR}/texture
-)
-
 add_dependencies(
     ${GAME_ENGINE_NAME}
-
-    default_shaders
-    default_textures
+    ONIP_ASSETS
 )

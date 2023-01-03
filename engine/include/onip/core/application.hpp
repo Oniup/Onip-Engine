@@ -12,10 +12,10 @@ namespace onip {
         virtual ~Application() = default;
 
         static Application* getInstance();
-        static ONIP_INLINE class GLPipeline* getGraphicsPipeline() { return getInstance()->m_pipeline; }
+        static ONIP_INLINE class GlPipeline* getGraphicsPipeline() { return getInstance()->m_pipeline; }
         static ONIP_INLINE class SceneManager* getSceneManager() { return getInstance()->m_scene_manager; }
 
-        virtual void initializeLayers() {}
+        virtual void initializeRequirements() {}
 
         void run();
         ApplicationLayer* addLayer(ApplicationLayer* layer);
@@ -23,7 +23,7 @@ namespace onip {
         void destroyLayers();
 
         std::vector<ApplicationLayer*> m_layers {};
-        class GLPipeline* m_pipeline { nullptr };
+        class GlPipeline* m_pipeline { nullptr };
         class SceneManager* m_scene_manager { nullptr };
     };
 }
