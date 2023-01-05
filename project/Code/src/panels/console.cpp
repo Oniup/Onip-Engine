@@ -1,4 +1,2 @@
 #include "panels/console.hpp"
-
-Console::Console() {
-}
+#include <imgui/imgui.h>
