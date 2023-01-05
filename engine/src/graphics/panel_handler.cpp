@@ -12,7 +12,6 @@ namespace onip {
         ImGui::CreateContext();
         m_io = &ImGui::GetIO(); (void)*m_io;
         m_io->ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
-        m_io->ConfigFlags |= ImGuiConfigFlags_DockingEnable;
         m_io->ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
         m_io->ConfigViewportsNoAutoMerge = true;
         m_io->ConfigViewportsNoTaskBarIcon = true;
@@ -39,16 +38,39 @@ namespace onip {
     void PanelHandler::onUpdate() {
         ImGuiIO& io = ImGui::GetIO(); (void)io;
 
-        ImGui_ImplOpenGL3_NewFrame();
-        ImGui_ImplGlfw_NewFrame();
-        ImGui::NewFrame();
+        glNewFrame();
 
-        ImGui::Begin("Test Window");
+        static ImGuiDockNodeFlags docking_flags = ImGuiDockNodeFlags_None;
+        ImGuiWindowFlags window_flags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking;
+        const ImGuiViewport* viewport = ImGui::GetMainViewport();
+        ImGui::SetNextWindowPos(viewport->WorkPos);
+        ImGui::SetNextWindowSize(viewport->WorkSize);
+        ImGui::SetNextWindowViewport(viewport->ID);
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+        window_flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove;
+        window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
+
+        window_flags |= ImGuiWindowFlags_NoBackground;
+        ImGui::Begin("Main Docking Space", (bool*)true, window_flags);
+        ImGui::PopStyleVar(2);
+        if (m_io->ConfigFlags & ImGuiConfigFlags_DockingEnable) {
+            ImGuiID docking_id = ImGui::GetID("Docking Space");
+            ImGui::DockSpace(docking_id, ImVec2(0.0f, 0.0f), docking_flags);
+        }
+        else {
+            ImGui::Text("Error, Need to Enable Dock Space");
+            if (ImGui::SmallButton("Click to Enable Dock Space")) {
+                m_io->ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+            }
+        }
+
+        ImGui::Begin("Test Window", (bool*)true);
         ImGui::Text("This is some Text");
         ImGui::End();
 
-        ImGui::Render();
-        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+        ImGui::End();
+        glEndFrame();
     }
 
     void PanelHandler::updateImGuiPlatformWindow() {
@@ -57,5 +79,25 @@ namespace onip {
             ImGui::RenderPlatformWindowsDefault();
             glfwMakeContextCurrent(GlPipeline::getWindow()->getInternalWindow());
         }
+    }
+
+    void PanelHandler::enableMainWindowDockSpace(bool enable) {
+        if (enable) {
+            m_io->ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+        }
+        else {
+            m_io->ConfigFlags &= ~ImGuiConfigFlags_DockingEnable;
+        }
+    }
+
+    void PanelHandler::glNewFrame() {
+        ImGui_ImplOpenGL3_NewFrame();
+        ImGui_ImplGlfw_NewFrame();
+        ImGui::NewFrame();
+    }
+
+    void PanelHandler::glEndFrame() {
+        ImGui::Render();
+        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
     }
 }

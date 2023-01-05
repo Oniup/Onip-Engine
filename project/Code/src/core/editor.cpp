@@ -68,7 +68,7 @@ private:
 };
 
 void Editor::initializeRequirements() {
-    onip::PanelHandler* panel_handler = static_cast<onip::PanelHandler*>(onip::Application::getLayer("Panel Handler"));
+    Application::getPanelHandler()->enableMainWindowDockSpace(true);
 
     onip::GlBatchRenderer* batch_renderer =  static_cast<onip::GlBatchRenderer*>(onip::GlPipeline::createRenderer(new onip::GlBatchRenderer()));
     onip::GlPipeline::createTexture("Box Test", "engine/assets/textures/test_crate.png");
