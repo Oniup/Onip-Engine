@@ -5,6 +5,7 @@
 #include "onip/graphics/gl_pipeline.hpp"
 #include "onip/core/scene_manager.hpp"
 #include "onip/graphics/panel_handler.hpp"
+#include "onip/core/debug.hpp"
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -27,6 +28,7 @@ namespace onip {
         m_pipeline = static_cast<GlPipeline*>(addLayer(new GlPipeline()));
         m_scene_manager = static_cast<SceneManager*>(addLayer(new SceneManager()));
         m_panel_handler = static_cast<PanelHandler*>(addLayer(new PanelHandler()));
+        addLayer(new Debug());
 
         ImGuiIO& io = ImGui::GetIO(); (void)io;
 

@@ -1,10 +1,11 @@
 #include "panels/hierarchy.hpp"
 #include <imgui/imgui.h>
 
+#include <onip/core/debug.hpp>
 #include "panels/console.hpp"
 
 Hierarchy::Hierarchy() {
-    Console::logMessage("Initialize Hierarchy Panel");
+    onip::Debug::logMessage("Initialize Hierarchy Panel");
 }
 
 void Hierarchy::onImGuiDraw() {

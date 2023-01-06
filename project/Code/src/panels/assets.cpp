@@ -1,10 +1,11 @@
 #include "panels/assets.hpp"
 #include "panels/console.hpp"
 
+#include <onip/core/debug.hpp>
 #include <imgui/imgui.h>
 
 Assets::Assets() {
-    Console::logMessage("Initialize Assets Panel");
+    onip::Debug::logMessage("Initialize Assets Panel");
 }
 
 void Assets::onImGuiDraw() {
