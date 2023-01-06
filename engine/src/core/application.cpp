@@ -49,21 +49,12 @@ namespace onip {
         glfwTerminate();
     }
 
-    ApplicationLayer* Application::addLayer(ApplicationLayer* layer) {
+    ApplicationLayer* Application::impl_addLayer(ApplicationLayer* layer) {
         m_layers.insert(m_layers.begin(), layer);
         return m_layers[0];
     }
 
-    const ApplicationLayer* Application::getLayer(std::string_view name) const {
-        for (ApplicationLayer* layer : m_layers) {
-            if (layer->getName() == name) {
-                return layer;
-            }
-        }
-        return nullptr;
-    }
-
-    ApplicationLayer* Application::getLayer(std::string_view name) {
+    ApplicationLayer* Application::impl_getLayer(std::string_view name) {
         for (ApplicationLayer* layer : m_layers) {
             if (layer->getName() == name) {
                 return layer;

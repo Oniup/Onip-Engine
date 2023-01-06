@@ -20,7 +20,7 @@ namespace onip {
         Debug();
         ~Debug() override = default;
 
-        ONIP_INLINE static const std::vector<std::tuple<std::string_view, DebugLogSeverity>>& getLogs() { return s_instance->m_logs; }
+        ONIP_INLINE static const std::vector<std::tuple<std::string, DebugLogSeverity>>& getLogs() { return s_instance->m_logs; }
 
         static void logMessage(std::string_view message);
         static void logWarning(std::string_view warning);
@@ -30,7 +30,7 @@ namespace onip {
     private:
         static Debug* s_instance;
 
-        std::vector<std::tuple<std::string_view, DebugLogSeverity>> m_logs {};
+        std::vector<std::tuple<std::string, DebugLogSeverity>> m_logs {};
     };
 }
 

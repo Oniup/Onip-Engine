@@ -4,9 +4,11 @@
 #include "onip/utils/utils.hpp"
 #include "onip/utils/pool.hpp"
 #include "onip/core/entity_manager.hpp"
+#include "onip/core/debug.hpp"
 
 #include <iostream>
 #include <vector>
+#include <string>
 #include <tuple>
 
 namespace onip {
@@ -272,15 +274,14 @@ namespace onip {
         }
 
         void debugPrintComponents() {
-#ifndef NDEBUG
-            std::cout << "Debug Print Components\n";
+            std::string debug = "\nDebug Print Components\n";
             uint32_t group_index = 0;
             for (ComponentGroup* group : m_groups) {
-                std::cout  << "\n[" << group_index << "]: Component Group Ids: ";
+                debug += "\n[" + std::to_string(group_index) + "]: Component Group Ids: ";
                 for (uint32_t& id : group->comp_ids) {
-                    std::cout << id << ", ";
+                    debug += std::to_string(id) + ", ";
                 }
-                std::cout << "\n";
+                debug += "\n";
 
                 uint32_t released_fround = 0;
                 if (group->pool->getAllocations() > 0) {
@@ -294,17 +295,17 @@ namespace onip {
                         }
 
                         ComponentMeta* meta = static_cast<ComponentMeta*>(ptr);
-                        std::cout << "Id: " << meta->comp_id << "\tEntity UUID: " << meta->entity->uuid;
+                        debug += "Id: " + std::to_string(meta->comp_id) + "\tEntity UUID: " + std::to_string(meta->entity->uuid);
                         if (meta->entity->tag != nullptr) {
-                            std::cout << "\tEntity Tag: " << *meta->entity->tag;
+                            debug += "\tEntity Tag: " + *meta->entity->tag;
                         }
-                        std::cout << "\n";
+                        debug += "\n";
                     }
                 }
-                std::cout << "\n";
+                debug += "\n";
                 group_index++;
             }
-#endif // NDEBUG
+            Debug::logMessage(debug);
         }
     private:
         bool checkRepeatingIds(const uint32_t ids[], size_t ids_size) {
@@ -312,11 +313,12 @@ namespace onip {
                 for (size_t j = 0; j < ids_size; j++) {
                     if (i != j) {
                         if (ids[i] == ids[j]) {
-                            std::cout << "cannot create component group as there is two ids that are the same: [ ";
+                            std::string debug = "Cannot create component group as there are two or more ids that are the same: [";
                             for (size_t i = 0; i < ids_size; i++) {
-                                std::cout << ids[i] << " ";
+                                debug += std::to_string(ids[i]) + " ";
                             }
-                            std::cout << "]\n";
+                            debug += "]\n";
+                            Debug::logError(debug);
                             return false;
                         }
                     }

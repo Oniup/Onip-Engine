@@ -25,7 +25,7 @@ namespace onip {
     }
 
     void Debug::log(std::string_view log, DebugLogSeverity severity) {
-        s_instance->m_logs.push_back(std::make_tuple(log, severity));
+        s_instance->m_logs.push_back(std::tuple<std::string, DebugLogSeverity>(log, severity));
     }
 
     void Debug::clearLogs() {

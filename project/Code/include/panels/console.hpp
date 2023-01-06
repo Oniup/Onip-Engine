@@ -3,10 +3,6 @@
 
 #include <onip/graphics/panel_handler.hpp>
 #include <onip/core/debug.hpp>
-#include <string>
-#include <string_view>
-#include <tuple>
-#include <vector>
 #include <imgui/imgui.h>
 
 class Console : public onip::PanelHandler::Panel {

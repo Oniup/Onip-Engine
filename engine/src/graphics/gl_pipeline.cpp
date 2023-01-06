@@ -2,7 +2,9 @@
 
 #include "onip/graphics/gl_pipeline.hpp"
 #include "onip/graphics/gl_batch_renderer.hpp"
+#include "onip/core/debug.hpp"
 
+#include <iostream>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <stb/stb_image.h>
@@ -68,39 +70,48 @@ namespace onip {
         for (uint32_t i = 0; i < 2; i++) {
             FILE* file = fopen(paths[i], "rb");
             if (file == nullptr) {
-                std::cout << "Failed to find path " << paths[i] << "\n";
+                Debug::logError(std::string("Failed to find path ") + paths[i]);
                 if (i != 0) {
                     glDeleteShader(shaders[0]);
                 }
                 return nullptr;
             }
-            fseek(file, 0, SEEK_END);
+            std::fseek(file, 0, SEEK_END);
             uint32_t source_length = ftell(file);
-            fseek(file, 0, SEEK_SET);
-            char* source = (char*)malloc(sizeof(char*) * source_length);
-            fread(source, sizeof(char), source_length, file);
+            std::fseek(file, 0, SEEK_SET);
+            char* source = (char*)std::malloc(sizeof(char*) * source_length);
+            std::fread(source, sizeof(char), source_length, file);
             source[source_length] = '\0';
+            std::fclose(file);
 
             shaders[i] = glCreateShader(GL_FRAGMENT_SHADER + i);
             glShaderSource(shaders[i], sizeof(char), (const char* const*)&source, nullptr);
             glCompileShader(shaders[i]);
+            std::free(source);
 
             int result;
             glGetShaderiv(shaders[i], GL_COMPILE_STATUS, &result);
             if (!result) {
                 glGetShaderiv(shaders[i], GL_INFO_LOG_LENGTH, &result);
-                char* error_message = (char*)malloc(sizeof(char*) * result);
+                char* error_message = (char*)std::malloc(sizeof(char*) * result);
                 glGetShaderInfoLog(shaders[i], result, &result, error_message);
                 error_message[result] = '\0';
-                ONIP_ASSERT_FMT(false, "Failed to compile shader at [%s]\nOpenGL %s", paths[i], error_message);
+                Debug::logError(std::string("Failed to compile shader at [") + paths[i] + "]\nOpenGL " + error_message);
+                std::free(error_message);
+
+                if (i != 0) {
+                    glDeleteShader(shaders[0]);
+                }
+                return nullptr;
             }
 
             glAttachShader(shader_program, shaders[i]);
-            fclose(file);
-            free(source);
         }
 
         glLinkProgram(shader_program);
+        glDeleteShader(shaders[0]);
+        glDeleteShader(shaders[1]);
+
         int result;
         glGetProgramiv(shader_program, GL_LINK_STATUS, &result);
         if (!result) {
@@ -108,10 +119,10 @@ namespace onip {
             char* error_message = (char*)malloc(sizeof(char*) * result);
             glGetProgramInfoLog(shader_program, result, &result, error_message);
             error_message[result] = '\0';
-            ONIP_ASSERT_FMT(false, "Failed to Link Shaders to Program:\n\t- %s\n\t- %s\nOpenGL %s", paths[0], paths[1], error_message);
+            Debug::logError(std::string("Failed to Link Shaders to Program:\n\t- ") + paths[0] + "\n\t- " + paths[1] + "\nOpenGL " + error_message);
+            std::free(error_message);
+            return nullptr;
         }
-        glDeleteShader(shaders[0]);
-        glDeleteShader(shaders[1]);
 
         m_shaders.push_back(new Shader{
             name.data(), shader_program
@@ -129,7 +140,10 @@ namespace onip {
 
         int width, height, channels;
         uint8_t* buffer = stbi_load(path.data(), &width, &height, &channels, 0);
-        ONIP_ASSERT_FMT(buffer, "Failed to create shader, couldn't find [%s]\n", path.data());
+        if (buffer == nullptr) {
+            Debug::logError(std::string("Failed to create texture, couldn't find path ") + path.data());
+            return nullptr;
+        }
 
         uint32_t texture_id;
         glGenTextures(1, &texture_id);
@@ -191,12 +205,12 @@ namespace onip {
 #ifndef NDEBUG
         for (Material* material : m_materials) {
             if (material->name == name) {
-                std::cout << "cannot create material because it already exists\n";
+                Debug::logWarning("cannot create material because it already exists");
                 return nullptr;
             }
         }
         if (shader == nullptr) {
-            std::cout << "cannot create material as the shader passed is null\n";
+            Debug::logError("cannot create material as the shader passed is null");
             return nullptr;
         }
 #endif // NDEBUG

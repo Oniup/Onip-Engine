@@ -42,6 +42,8 @@ namespace onip {
         void pushMaterial(UUID entity_id, const GlPipeline::Material* material, uint32_t render_layer, const glm::vec4* overlay_color = nullptr);
         void pushOverrideTextures(UUID entity_id, const std::vector<const GlPipeline::Texture*>& override_diffuse, const std::vector<const GlPipeline::Texture*>& override_specular, const std::vector<const GlPipeline::Texture*>& override_ambient);
         void pushRenderingCameras(const std::vector<Camera*>& cameras, const std::vector<Transform*>& camera_transforms);
+
+        ONIP_INLINE void debugLogBatchVertexData() { m_print_vertex_data_debug = true; }
     private:
         struct Batch {
             Batch() = default;
@@ -100,6 +102,7 @@ namespace onip {
         std::list<RenderLayer> m_batches {};
         std::vector<Reserve> m_reserves {};
         std::vector<std::tuple<Transform*, Camera*>> m_rendering_cameras {};
+        bool m_print_vertex_data_debug { false };
     };
 }
 

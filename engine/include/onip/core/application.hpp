@@ -13,18 +13,19 @@ namespace onip {
         virtual ~Application() = default;
 
         static Application* getInstance();
-        static ONIP_INLINE class GlPipeline* getGraphicsPipeline() { return getInstance()->m_pipeline; }
-        static ONIP_INLINE class SceneManager* getSceneManager() { return getInstance()->m_scene_manager; }
-        static ONIP_INLINE class PanelHandler* getPanelHandler() { return getInstance()->m_panel_handler; }
+        ONIP_INLINE static class GlPipeline* getGraphicsPipeline() { return getInstance()->m_pipeline; }
+        ONIP_INLINE static class SceneManager* getSceneManager() { return getInstance()->m_scene_manager; }
+        ONIP_INLINE static class PanelHandler* getPanelHandler() { return getInstance()->m_panel_handler; }
+        ONIP_INLINE static ApplicationLayer* addLayer(ApplicationLayer* layer) { return getInstance()->impl_addLayer(layer); }
+        ONIP_INLINE static ApplicationLayer* getLayer(std::string_view name) { return getInstance()->impl_getLayer(name); }
         static void quit();
 
         virtual void initializeRequirements() {}
 
         void run();
-        ApplicationLayer* addLayer(ApplicationLayer* layer);
-        const ApplicationLayer* getLayer(std::string_view name) const;
-        ApplicationLayer* getLayer(std::string_view name);
     private:
+        ApplicationLayer* impl_addLayer(ApplicationLayer* layer);
+        ApplicationLayer* impl_getLayer(std::string_view name);
         void destroyLayers();
 
         std::vector<ApplicationLayer*> m_layers {};

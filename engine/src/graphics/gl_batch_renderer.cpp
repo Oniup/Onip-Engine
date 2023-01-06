@@ -1,4 +1,5 @@
 #include "onip/graphics/gl_batch_renderer.hpp"
+#include "onip/core/debug.hpp"
 
 #include <iostream>
 #include <string>
@@ -15,6 +16,8 @@ namespace onip {
 
     void GlBatchRenderer::onDraw() {
         glBindVertexArray(m_vertex_array);
+        static std::string vertex_data_string;
+
         for (std::tuple<Transform*, Camera*> camera : m_rendering_cameras) {
             glm::mat4 view = glm::lookAt(
                 std::get<Transform*>(camera)->position, 
@@ -22,28 +25,27 @@ namespace onip {
                 std::get<Transform*>(camera)->scale
             );
 
-            static bool first_time_printing_for_first_batch = true;
+            vertex_data_string = "OpenGL Batch Renderer:";
             for (RenderLayer& layer : m_batches) {
+                vertex_data_string += "\nlayer [" + std::to_string(layer.layer) + "]:\n";
                 for (Batch& batch : layer.batches) {
-#ifndef NDEBUG
-                    if (first_time_printing_for_first_batch) {
-                        std::cout << "vertex data:\n";
+                    if (m_print_vertex_data_debug) {
+                        vertex_data_string += "Vertex Data:\n";
                         size_t j = 0;
                         for (size_t i = 0; i < batch.vertices.size(); i += ONIP_RAW_VERTEX_FLOAT_ELEMENT_COUNT) {
                             if (j > 3) {
                                 j = 0;
-                                std::cout << "\n";
+                                vertex_data_string += "\n";
                             }
-                            std::cout << "[" << batch.vertices[i] << ", " << batch.vertices[i + 1] << ", " << batch.vertices[i + 2] << "]\t";
-                            std::cout << batch.vertices[i + 3] << "\t" << batch.vertices[i + 4] << "\n";
+                            vertex_data_string += "\t[" + std::to_string(batch.vertices[i]) + ", " + std::to_string(batch.vertices[i + 1]) + ", " + std::to_string(batch.vertices[i + 2]) + "]\t";
+                            vertex_data_string += std::to_string(batch.vertices[i + 3]) + "\t" + std::to_string(batch.vertices[i + 4]) + "\n";
                             j++;
                         }
-                        std::cout << "\nindex data:\n";
+                        vertex_data_string += "\nIndex Data:\n\t";
                         for (size_t i = 0; i < batch.indices.size(); i += 3) {
-                            std::cout << batch.indices[i] << ", " << batch.indices[i + 1] << ", " << batch.indices[i + 2] << "\n";
+                            vertex_data_string += std::to_string(batch.indices[i]) + ", " + std::to_string(batch.indices[i + 1]) + ", " + std::to_string(batch.indices[i + 2]) + "\n\t";
                         }
                     }
-#endif // NDEBUG
 
                     glUseProgram(batch.shader->id);
 
@@ -79,7 +81,11 @@ namespace onip {
                 }
 
             }
-            first_time_printing_for_first_batch = false;
+
+            if (m_print_vertex_data_debug) {
+                Debug::logMessage(vertex_data_string);
+                m_print_vertex_data_debug = false;
+            }
         }
         glBindVertexArray(0);
         glUseProgram(0);
@@ -113,7 +119,11 @@ namespace onip {
 
             return;
         }
-        std::cout << "Cannot push Material to Reserve due to the override_texture_count (" << override_texture_count << ") + material texture count (" << texture_count << ") exceed the max texture count (" << GlPipeline::getMaxTextureUnitsPerFrag() << "\n";
+        Debug::logError(
+            std::string("Cannot push Material to Reserve due to the override_texture_count (" + std::to_string(override_texture_count) + 
+            ") + material texture count (" + std::to_string(texture_count) + ") exceed the max texture count (" + 
+            std::to_string(GlPipeline::getMaxTextureUnitsPerFrag()) + "\n")
+        );
     }
 
     void GlBatchRenderer::pushOverrideTextures(UUID entity_id, const std::vector<const GlPipeline::Texture*>& override_diffuse, const std::vector<const GlPipeline::Texture*>& override_specular, const std::vector<const GlPipeline::Texture*>& override_ambient) {
@@ -131,7 +141,11 @@ namespace onip {
 
             return;
         }
-        std::cout << "Cannot push Material to Reserve due to the override_texture_count (" << override_texture_count << ") + material texture count (" << material_texture_count << ") exceed the max texture count (" << GlPipeline::getMaxTextureUnitsPerFrag() << "\n";
+        Debug::logError(
+            std::string("Cannot push Textures to Reserve due to the override_texture_count (" + std::to_string(override_texture_count) + 
+            ") + material texture count (" + std::to_string(material_texture_count) + ") exceed the max texture count (" + 
+            std::to_string(GlPipeline::getMaxTextureUnitsPerFrag()) + "\n")
+        );
     }
 
     void GlBatchRenderer::pushRenderingCameras(const std::vector<Camera*>& cameras, const std::vector<Transform*>& camera_transforms) {

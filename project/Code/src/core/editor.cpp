@@ -109,6 +109,4 @@ void Editor::initializeRequirements() {
     transform = onip::Ecs::getComponent<onip::Transform>(entity);
     transform->rotation = glm::vec4(0.0f, 0.0f, -1.0f, 0.0f);
     transform->scale = glm::vec3(0.0f, 1.0f, 0.0f);
-
-    onip::Ecs::debugPrintComponentGroups();
 }
