@@ -16,6 +16,7 @@ namespace onip {
         static ONIP_INLINE class GlPipeline* getGraphicsPipeline() { return getInstance()->m_pipeline; }
         static ONIP_INLINE class SceneManager* getSceneManager() { return getInstance()->m_scene_manager; }
         static ONIP_INLINE class PanelHandler* getPanelHandler() { return getInstance()->m_panel_handler; }
+        static void quit();
 
         virtual void initializeRequirements() {}
 

@@ -17,6 +17,10 @@ namespace onip {
         return Config::settingsApplication();
     }
 
+    void Application::quit() {
+        GlPipeline::getWindow()->close();
+    }
+
     void Application::run() {
         assert(glfwInit() && "failed to initialize glfw for some reason ...");
 

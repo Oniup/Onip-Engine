@@ -72,6 +72,7 @@ namespace onip {
         bool isClosing() const;
         void clearScreen();
         void swapBuffers();
+        void close();
     private:
         void initInstance();
     

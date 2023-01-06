@@ -5,6 +5,7 @@
 #include <imgui/backends/imgui_impl_glfw.h>
 #include <imgui/backends/imgui_impl_opengl3.h>
 #include <GLFW/glfw3.h>
+#include <iostream>
 
 namespace onip {
     PanelHandler::PanelHandler() : ApplicationLayer("Panel Handler") {
@@ -36,40 +37,13 @@ namespace onip {
     }
 
     void PanelHandler::onUpdate() {
-        ImGuiIO& io = ImGui::GetIO(); (void)io;
-
         glNewFrame();
-
-        static ImGuiDockNodeFlags docking_flags = ImGuiDockNodeFlags_None;
-        ImGuiWindowFlags window_flags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking;
-        const ImGuiViewport* viewport = ImGui::GetMainViewport();
-        ImGui::SetNextWindowPos(viewport->WorkPos);
-        ImGui::SetNextWindowSize(viewport->WorkSize);
-        ImGui::SetNextWindowViewport(viewport->ID);
-        ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
-        ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
-        window_flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove;
-        window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
-
-        window_flags |= ImGuiWindowFlags_NoBackground;
-        ImGui::Begin("Main Docking Space", (bool*)true, window_flags);
-        ImGui::PopStyleVar(2);
-        if (m_io->ConfigFlags & ImGuiConfigFlags_DockingEnable) {
-            ImGuiID docking_id = ImGui::GetID("Docking Space");
-            ImGui::DockSpace(docking_id, ImVec2(0.0f, 0.0f), docking_flags);
+        for (Panel* panel : m_panels) {
+            panel->settingsBeforeImGuiBegin();
+            ImGui::Begin(panel->getName(), panel->getOpenedPtr(), panel->getImGuiWindowFlags());
+            panel->onImGuiDraw();
+            ImGui::End();
         }
-        else {
-            ImGui::Text("Error, Need to Enable Dock Space");
-            if (ImGui::SmallButton("Click to Enable Dock Space")) {
-                m_io->ConfigFlags |= ImGuiConfigFlags_DockingEnable;
-            }
-        }
-
-        ImGui::Begin("Test Window", (bool*)true);
-        ImGui::Text("This is some Text");
-        ImGui::End();
-
-        ImGui::End();
         glEndFrame();
     }
 
@@ -88,6 +62,17 @@ namespace onip {
         else {
             m_io->ConfigFlags &= ~ImGuiConfigFlags_DockingEnable;
         }
+    }
+
+    bool PanelHandler::removePanel(const char* name) {
+        for (std::vector<Panel*>::iterator panel = m_panels.begin(); panel != m_panels.end(); panel++) {
+            Panel* ptr = *panel;
+            if (std::strncmp(name, ptr->getName(), std::strlen(name))) {
+                m_panels.erase(panel);
+                return true;
+            }
+        }
+        return false;
     }
 
     void PanelHandler::glNewFrame() {

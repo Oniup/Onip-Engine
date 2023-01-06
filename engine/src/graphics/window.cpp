@@ -231,6 +231,10 @@ namespace onip {
         glfwSwapBuffers(m_internal);
         m_size_changed = false;
     }
+
+    void Window::close() {
+        glfwSetWindowShouldClose(m_internal, true);
+    }
     
     void Window::initInstance() {
         glfwWindowHint(GLFW_VERSION_MAJOR, 4);
