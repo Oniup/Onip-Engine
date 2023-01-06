@@ -24,7 +24,11 @@ target_include_directories(
     ${APPLICATION_NAME}
 
     PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/code/include
-    PUBLIC ${CMAKE_SOURCE_DIR}/onip/include
+    PUBLIC ${CMAKE_SOURCE_DIR}/engine/include
+    PUBLIC ${CMAKE_SOURCE_DIR}/engine/thirdparty
+    PUBLIC ${CMAKE_SOURCE_DIR}/engine/thirdparty/glad/include
+    PUBLIC ${CMAKE_SOURCE_DIR}/engine/thirdparty/glfw/include
+    PUBLIC ${CMAKE_SOURCE_DIR}/engine/thirdparty/glm/
 )
 
 target_link_libraries(

@@ -6,6 +6,26 @@ endif()
 
 set(GAME_ENGINE_NAME Engine CACHE INTERNAL "")
 
+set(
+    ONIP_ENGINE_INCLUDES PUBLIC 
+
+    ${CMAKE_CURRENT_SOURCE_DIR}/include 
+
+    CACHE INTERNAL ""
+)
+set(
+    ONIP_THIRDPARTY_INDLUCES
+
+    PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty
+    PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/glad/include
+    PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/glfw/include
+    PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/glm/
+    PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/imgui
+    PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/imgui/backends
+
+    CACHE INTERNAL ""
+)
+
 add_subdirectory(thirdparty)
 
 file(GLOB_RECURSE GAME_ENGINE_HEADERS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "include/onip/*.hpp")
@@ -21,11 +41,8 @@ add_library(
 target_include_directories(
     ${GAME_ENGINE_NAME}
 
-    PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include
-    PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty
-    PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/glad/include
-    PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/glfw/include
-    PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/glm/
+    ${ONIP_ENGINE_INCLUDES}
+    ${ONIP_THIRDPARTY_INDLUCES}
 )
 
 target_link_libraries(
@@ -34,6 +51,7 @@ target_link_libraries(
     PRIVATE ${OPENGL_LIBRARIES}
     PRIVATE glfw
     PRIVATE glad
+    PRIVATE imgui
 )
 
 if (MSVC)

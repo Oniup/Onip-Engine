@@ -112,6 +112,7 @@ namespace onip {
         ONIP_INLINE static Texture* createTexture(std::string_view name, std::string_view path, TextureConfig config = TextureConfig_Default) { return Application::getGraphicsPipeline()->implCreateTexture(name, path, config); }
         ONIP_INLINE static Material* createMaterial(std::string_view name, const Shader* shader) { return Application::getGraphicsPipeline()->implCreateMaterial(name, shader); }
         ONIP_INLINE static Renderer* createRenderer(Renderer*&& renderer) { return Application::getGraphicsPipeline()->implCreateRenderer(std::move(renderer)); }
+        ONIP_INLINE static const char* getOpenGlVersion() { return "#version 450 core"; }
 
         void onUpdate() override;
     private:
