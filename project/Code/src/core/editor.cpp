@@ -1,7 +1,10 @@
 #include "core/editor.hpp"
 
-#include "panels/console.hpp"
 #include "panels/docking_space.hpp"
+#include "panels/console.hpp"
+#include "panels/hierarchy.hpp"
+#include "panels/assets.hpp"
+#include "panels/inspector.hpp"
 
 #include <onip/config.hpp>
 #include <onip/core/scene_manager.hpp>
@@ -73,10 +76,9 @@ void Editor::initializeRequirements() {
     Application::getPanelHandler()->enableMainWindowDockSpace(true);
     Application::getPanelHandler()->addPanel<DockingSpace>();
     Application::getPanelHandler()->addPanel<Console>();
-
-    Console::logMessage("This is a test");
-    Console::logWarning("This is a test");
-    Console::logError("This is a test");
+    Application::getPanelHandler()->addPanel<Hierarchy>();
+    Application::getPanelHandler()->addPanel<Assets>();
+    Application::getPanelHandler()->addPanel<Inspector>();
 
     onip::GlBatchRenderer* batch_renderer =  static_cast<onip::GlBatchRenderer*>(onip::GlPipeline::createRenderer(new onip::GlBatchRenderer()));
     onip::GlPipeline::createTexture("Box Test", "engine/assets/textures/test_crate.png");
