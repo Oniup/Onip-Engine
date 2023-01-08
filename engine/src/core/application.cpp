@@ -15,7 +15,7 @@
 
 namespace onip {
     Application* Application::getInstance() {
-        return Config::settingsApplication();
+        return Config::globalApplicationInstance();
     }
 
     void Application::quit() {

@@ -20,11 +20,11 @@ namespace onip {
 
     void GraphicsVertexExtractionSystem::onUpdate() {
         if (m_target_pool == nullptr) {
-            m_target_pool = Ecs::getPoolWhichContains<Transform, SpriteRenderer, MeshRenderer>();
+            m_target_pool = getPoolWhichContains<Transform, SpriteRenderer, MeshRenderer>();
         }
 
         if (m_target_pool->getAllocations() > 0) {
-            std::vector<Camera*> camera_cameras = std::move(Ecs::getAllOfComponent<Camera>());
+            std::vector<Camera*> camera_cameras = std::move(getAllOfComponent<Camera>());
             std::vector<Transform*> camera_transforms {};
             camera_transforms.resize(camera_cameras.size());
 
@@ -34,12 +34,12 @@ namespace onip {
                 }
                     
                 ComponentMeta* meta = static_cast<ComponentMeta*>(ptr);
-                if (Ecs::checkIfSameComponentType<Transform>(meta)) {
-                    Transform* transform = Ecs::getComponentFromMeta<Transform>(meta);
+                if (checkIfSameComponentType<Transform>(meta)) {
+                    Transform* transform = getComponentFromMeta<Transform>(meta);
                     bool camera_found = false;
                     for (size_t i = 0; i < camera_cameras.size(); i++) {
                         Camera* camera = camera_cameras[i];
-                        if (Ecs::getMetaFromComponent(camera)->entity->uuid == meta->entity->uuid) {
+                        if (getMetaFromComponent(camera)->entity->uuid == meta->entity->uuid) {
                             camera_found = true;
                             camera_transforms[i] = transform;
                             break;
@@ -50,13 +50,13 @@ namespace onip {
                     }
                     m_batch_renderer->pushTransform(meta->entity->uuid, transform);
                 }
-                else if (Ecs::checkIfSameComponentType<MeshRenderer>(meta)) {
-                    MeshRenderer* mesh_renderer = Ecs::getComponentFromMeta<MeshRenderer>(meta);
+                else if (checkIfSameComponentType<MeshRenderer>(meta)) {
+                    MeshRenderer* mesh_renderer = getComponentFromMeta<MeshRenderer>(meta);
                     m_batch_renderer->pushVertexData(meta->entity->uuid, &mesh_renderer->vertex_data);
                     m_batch_renderer->pushMaterial(meta->entity->uuid, mesh_renderer->material, mesh_renderer->render_layer);
                 }
-                else if (Ecs::checkIfSameComponentType<SpriteRenderer>(meta)) {
-                    SpriteRenderer* sprite_renderer = Ecs::getComponentFromMeta<SpriteRenderer>(meta);
+                else if (checkIfSameComponentType<SpriteRenderer>(meta)) {
+                    SpriteRenderer* sprite_renderer = getComponentFromMeta<SpriteRenderer>(meta);
                     m_batch_renderer->pushVertexData(meta->entity->uuid, &sprite_renderer->vertex_data);
                     m_batch_renderer->pushOverrideTextures(
                         meta->entity->uuid, 

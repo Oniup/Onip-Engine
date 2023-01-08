@@ -3,14 +3,14 @@
 
 #include <onip/core/application.hpp>
 
-// Next Component ID Available: 3
-
 class Editor : public onip::Application {
 public:
     Editor();
     ~Editor();
 
     void initializeRequirements() override;
+private:
+    void panelHandlerImguiStyle();
 };
 
 #endif // __ONIP_EDITOR_CORE_EDITOR_HPP__

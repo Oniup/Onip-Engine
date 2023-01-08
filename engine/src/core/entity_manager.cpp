@@ -17,13 +17,13 @@ namespace onip {
             entity->tag = nullptr;
         }
 
-        Config::settingDefaultComponents(entity);
+        Config::defaultComponents(entity);
         return entity;
     }
 
     void EntityManager::destroyEntity(Entity* entity) {
         for (EntityComponentData& data : entity->components) {
-            Ecs::destroyComponent(entity, data.comp_id);
+            destroyComponent(entity, data.comp_id);
         }
         m_destroying_entities.push_back(entity);
     }
