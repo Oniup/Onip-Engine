@@ -15,6 +15,7 @@
 #include <onip/systems/vertex_extraction.hpp>
 #include <onip/core/input.hpp>
 #include <glm/glm.hpp>
+#include <imgui/imgui.h>
 
 static onip::Entity* entity = nullptr;
 
@@ -73,6 +74,7 @@ private:
 };
 
 void Editor::initializeRequirements() {
+    panelHandlerImguiStyle();
     Application::getPanelHandler()->enableMainWindowDockSpace(true);
     Application::getPanelHandler()->addPanel<DockingSpace>();
     Application::getPanelHandler()->addPanel<Console>();
@@ -109,4 +111,15 @@ void Editor::initializeRequirements() {
     transform = onip::Ecs::getComponent<onip::Transform>(entity);
     transform->rotation = glm::vec4(0.0f, 0.0f, -1.0f, 0.0f);
     transform->scale = glm::vec3(0.0f, 1.0f, 0.0f);
+}
+
+void Editor::panelHandlerImguiStyle() {
+    ImGuiStyle style {};
+    ImGui::StyleColorsClassic(&style);
+
+    // style.WindowBorderSize = 0.0f;
+    // style.WindowRounding = 1.0f;
+    // style.Colors[ImGuiCol_WindowBg].w = 1.0f;
+
+    Application::getPanelHandler()->updateGlobalStyle(style);
 }

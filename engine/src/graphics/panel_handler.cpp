@@ -20,11 +20,9 @@ namespace onip {
         ImGui::StyleColorsDark();
 
         ImGuiStyle& style = ImGui::GetStyle();
-        if (m_io->ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
-            style.WindowBorderSize = 0.0f;
-            style.WindowRounding = 1.0f;
-            style.Colors[ImGuiCol_WindowBg].w = 1.0f;
-        }
+        style.WindowBorderSize = 0.0f;
+        style.WindowRounding = 1.0f;
+        style.Colors[ImGuiCol_WindowBg].w = 1.0f;
 
         ImGui_ImplGlfw_InitForOpenGL(GlPipeline::getWindow()->getInternalWindow(), true);
         ImGui_ImplOpenGL3_Init(GlPipeline::getOpenGlVersion());
@@ -45,6 +43,11 @@ namespace onip {
             ImGui::End();
         }
         glEndFrame();
+    }
+
+    void PanelHandler::updateGlobalStyle(ImGuiStyle& custom_style) {
+        ImGuiStyle& style = ImGui::GetStyle();
+        style = custom_style;
     }
 
     void PanelHandler::updateImGuiPlatformWindow() {

@@ -35,6 +35,7 @@ namespace onip {
         ~PanelHandler() override;
 
         void onUpdate() override;
+        void updateGlobalStyle(ImGuiStyle& custom_style);
         void updateImGuiPlatformWindow();
 
         void enableMainWindowDockSpace(bool enable);
