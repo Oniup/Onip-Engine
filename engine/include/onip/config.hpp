@@ -14,12 +14,16 @@
 // Third Party
 #define STB_IMAGE_IMPLEMENTATION
 
+#include <imgui/imgui.h>
+
 namespace onip {
     struct Config { 
+        static constexpr ImGuiWindowFlags default_imgui_window_flags = ImGuiWindowFlags_NoCollapse;
+
         // Application instance that you inherited, return that
-        static class Application* settingsApplication();
+        static class Application* globalApplicationInstance();
         // defines the components that every entity will be assigned with when it is created
-        static void settingDefaultComponents(struct Entity* entity);
+        static void defaultComponents(struct Entity* entity);
     };
 }
 

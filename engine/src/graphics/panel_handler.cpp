@@ -19,10 +19,10 @@ namespace onip {
 
         ImGui::StyleColorsDark();
 
-        ImGuiStyle& style = ImGui::GetStyle();
-        style.WindowBorderSize = 0.0f;
-        style.WindowRounding = 1.0f;
-        style.Colors[ImGuiCol_WindowBg].w = 1.0f;
+        m_global_styling.style = &ImGui::GetStyle();
+        m_global_styling.style->WindowBorderSize = 0.0f;
+        m_global_styling.style->WindowRounding = 1.0f;
+        m_global_styling.style->Colors[ImGuiCol_WindowBg].w = 1.0f;
 
         ImGui_ImplGlfw_InitForOpenGL(GlPipeline::getWindow()->getInternalWindow(), true);
         ImGui_ImplOpenGL3_Init(GlPipeline::getOpenGlVersion());
@@ -45,9 +45,18 @@ namespace onip {
         glEndFrame();
     }
 
-    void PanelHandler::updateGlobalStyle(ImGuiStyle& custom_style) {
-        ImGuiStyle& style = ImGui::GetStyle();
-        style = custom_style;
+    void PanelHandler::updateGlobalStyle(const GlobalStyling& global_style) {
+        if (global_style.style != nullptr) {
+            *m_global_styling.style = *global_style.style;
+        }
+        m_global_styling.warning_color = global_style.warning_color;
+        m_global_styling.error_color = global_style.error_color;
+
+        if (global_style.font_path.length() > 0 && global_style.font_size > 0.0f) {
+            m_io->Fonts->AddFontFromFileTTF(global_style.font_path.c_str(), global_style.font_size);
+            m_global_styling.font_path = global_style.font_path;
+            m_global_styling.font_size = global_style.font_size;
+        }
     }
 
     void PanelHandler::updateImGuiPlatformWindow() {

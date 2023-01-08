@@ -4,6 +4,7 @@
 #include <onip/graphics/gl_batch_renderer.hpp>
 #include <onip/core/scene_manager.hpp>
 
+#include <imgui/imgui.h>
 #include <string>
 #include <vector>
 
@@ -26,7 +27,7 @@ void Console::onImGuiDraw() {
         }
         if (ImGui::BeginMenu("Debug Prints")) {
             if (ImGui::MenuItem("Print Debug ECS (Entity Component System)")) { 
-                onip::Ecs::debugPrintComponentGroups(); 
+                onip::debugPrintComponentGroups(); 
             }
             if (ImGui::MenuItem("Print Debug OpenGL Batch Renderer Vertex Data")) { 
                 onip::GlBatchRenderer* renderer = static_cast<onip::GlBatchRenderer*>(onip::GlPipeline::getRenderer("Batch Renderer"));
@@ -55,10 +56,16 @@ void Console::onImGuiDraw() {
                 ImGui::Text("[Message]: %s", std::get<std::string>(log).c_str());
             } break;
             case onip::DebugLogSeverity_Warning: {
-                ImGui::TextColored(warning_message_color, "[Warning]: %s", std::get<std::string>(log).c_str());
+                ImGui::TextColored(
+                    onip::Application::getPanelHandler()->getGlobalImGuiStyling()->warning_color, 
+                    "[Warning]: %s", std::get<std::string>(log).c_str()
+                );
             } break;
             case onip::DebugLogSeverity_Error: {
-                ImGui::TextColored(error_message_color, "[Error]: %s", std::get<std::string>(log).c_str());
+                ImGui::TextColored(
+                    onip::Application::getPanelHandler()->getGlobalImGuiStyling()->error_color, 
+                    "[Error]: %s", std::get<std::string>(log).c_str()
+                );
             } break;
             }
         }
