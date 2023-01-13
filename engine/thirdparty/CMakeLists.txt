@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.2)
 
 find_package(OpenGL REQUIRED)
+add_subdirectory(glfw)
+add_subdirectory(assimp)
 
 ######### GLAD #########
 
@@ -17,10 +19,6 @@ target_include_directories(
 
     PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/glad/include
 )
-
-######### GLFW #########
-
-add_subdirectory(glfw)
 
 ######### IMGUI ######### 
 

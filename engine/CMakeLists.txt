@@ -22,6 +22,7 @@ set(
     PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/glm/
     PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/imgui
     PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/imgui/backends
+    PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/assimp/include
 
     CACHE INTERNAL ""
 )
@@ -52,6 +53,7 @@ target_link_libraries(
     PRIVATE glfw
     PRIVATE glad
     PRIVATE imgui
+    PRIVATE assimp
 )
 
 if (MSVC)
